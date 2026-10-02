@@ -1,0 +1,48 @@
+# ---- Build ----
+target/
+*.class
+*.jar
+*.war
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Secrets & cấu hình máy ----
+# Mật khẩu DB nằm trong %APPDATA%/SalesManager/config.properties, KHÔNG nằm trong repo.
+# Dòng dưới chặn trường hợp vô tình copy file đó vào dự án.
+config.properties
+db.properties
+.env
+secrets/
+*.jks
+*.p12
+*.pem
+
+# ---- Dữ liệu công ty: TUYỆT ĐỐI không commit ----
+# File Excel thật của công ty (đơn hàng, hóa đơn, công nợ, tồn kho, trả về)
+samples/
+*.xlsx
+*.xls
+*.csv
+
+# Bản sao lưu database (pg_dump) — chứa toàn bộ dữ liệu khách hàng + công nợ
+backup/
+*.dump
+*.backup
+# CHÚ Ý: không ignore *.sql — Flyway migration nằm ở
+# src/main/resources/db/migration/*.sql và PHẢI được commit.
+
+# Ảnh trưng bày của khách (giai đoạn 2) lưu ở %APPDATA%, không ở repo
+attachments/
+
+# ---- IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+nbproject/

@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "deny": [
+      "Edit(src/main/java/**)",
+      "Write(src/main/java/**)",
+      "Edit(src/test/java/**)",
+      "Write(src/test/java/**)",
+      "Edit(src/main/resources/**/*.fxml)",
+      "Write(src/main/resources/**/*.fxml)",
+      "Edit(src/main/resources/css/**)",
+      "Write(src/main/resources/css/**)",
+      "Read(./samples/**)",
+      "Read(./backup/**)",
+      "Read(./.env)",
+      "Read(./secrets/**)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git rebase:*)",
+      "Bash(git checkout -- :*)",
+      "Bash(rm -rf:*)",
+      "Bash(mvn deploy:*)",
+      "Bash(mvn flyway:clean:*)",
+      "Bash(dropdb:*)",
+      "Bash(psql:*)"
+    ],
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Read(./src/**)",
+      "Read(./docs/**)",
+      "Read(./pom.xml)"
+    ]
+  }
+}
