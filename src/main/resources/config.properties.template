@@ -1,0 +1,14 @@
+# Template copied to %APPDATA%/SalesManager/config.properties on first run.
+# That copy is machine-specific and must never be committed - .gitignore blocks the name
+# "config.properties" everywhere in the repository.
+#
+# Only override what differs from application.properties.
+
+# Database password. Required from M1 on.
+db.password=
+
+# Uncomment and set only if pg_dump / pg_restore are not on PATH.
+# backup.pgBinDir=C:/Program Files/PostgreSQL/16/bin
+
+# Claude API key. Only needed in phase 3 (promotion suggestions). Leave empty until then.
+# ai.apiKey=

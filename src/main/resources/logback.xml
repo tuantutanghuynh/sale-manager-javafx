@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Log directory comes from a system property that Launcher.main() sets BEFORE the
+         first LoggerFactory call. The ":-logs" fallback only kicks in if that property is
+         missing (for example when a test boots Logback without going through Launcher) -
+         it writes next to the working directory, which is fine for tests but never for
+         the real app. See CLAUDE.md section 7 on desktop data locations. -->
+    <property name="LOG_DIR" value="${salesmanager.logDir:-logs}" />
+
+    <!-- charset UTF-8 is required or Vietnamese text in log messages becomes ??? -->
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Rolling by size AND date, with a hard total cap: the app runs for years on one
+         machine, so an uncapped log would quietly eat the disk. -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>200MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+    <!-- Our own code logs at debug; third-party libraries stay at info so the log stays
+         readable. HikariCP and Flyway are especially chatty at debug. -->
+    <logger name="com.tuantu.salesapp" level="debug" />
+
+</configuration>
