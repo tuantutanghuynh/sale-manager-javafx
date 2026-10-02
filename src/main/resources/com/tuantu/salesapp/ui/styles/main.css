@@ -1,0 +1,18 @@
+/* src/main/resources/com/tuantu/salesapp/ui/styles/main.css */
+
+/* Our own styles sit on top of the AtlantaFX user agent stylesheet.
+   AtlantaFX already defines the colour tokens for both light and dark, so this file
+   only carries what does NOT change with the theme: typography and spacing.
+   M2 fills in the real 8px spacing scale, type scale and the three status colours. */
+
+.root {
+    -fx-font-family: "Segoe UI", system-ui, sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* Temporary — exists only to prove main.css is actually loaded. If the label is not
+   bold and larger, the stylesheet path is wrong. M2 replaces this with real styles. */
+.app-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}

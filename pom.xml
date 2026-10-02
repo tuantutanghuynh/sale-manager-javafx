@@ -207,6 +207,12 @@
                         <palantirJavaFormat>
                             <version>${palantir.format.version}</version>
                         </palantirJavaFormat>
+                        <!-- Import groups separated by a blank line, per ADR-25.
+                             "\#" is the static-import group; the trailing empty entry
+                             catches everything else (org.slf4j, org.junit, atlantafx). -->
+                        <importOrder>
+                            <order>\#,java,javax,com.tuantu.salesapp,javafx,</order>
+                        </importOrder>
                         <removeUnusedImports/>
                         <trimTrailingWhitespace/>
                         <endWithNewline/>
