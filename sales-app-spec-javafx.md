@@ -38,7 +38,7 @@ Xem bảng đầy đủ ở `CLAUDE.md` mục 2. Tóm tắt các quyết định
 | Ngôn ngữ | Java 21 (LTS) | Đã có nền Java |
 | Giao diện | JavaFX 21 + FXML **viết tay** + AtlantaFX + Ikonli | Chuẩn desktop Java, giao diện hiện đại |
 | Build | Maven, **classpath (không JPMS)** | Ít rắc rối `opens`, `jpackage` vẫn chạy được |
-| Cơ sở dữ liệu | **PostgreSQL 16** chạy trên máy | Kiểu số chính xác, truy vấn tổng hợp mạnh, sau này đưa lên server được |
+| Cơ sở dữ liệu | **PostgreSQL 18** chạy trên máy, port 5432 | Kiểu số chính xác, truy vấn tổng hợp mạnh, sau này đưa lên server được. Bản 18 vì máy đã cài sẵn và đang ở port mặc định (ADR-26) |
 | Truy cập DB | **JDBC thuần + repository tự viết** + HikariCP | Báo cáo doanh số/công nợ là truy vấn tổng hợp — viết SQL thẳng dễ hơn ORM |
 | Migration | Flyway | File SQL có đánh số |
 | Excel | Apache POI | Đọc/ghi .xlsx |

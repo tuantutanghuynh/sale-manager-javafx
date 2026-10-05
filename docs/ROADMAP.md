@@ -10,9 +10,9 @@ Cập nhật: 02/10/2026. Nguồn yêu cầu: `sales-app-spec-javafx.md` v3. Quy
 
 | ID | Nội dung | Xong khi | Ước |
 |---|---|---|---|
-| **M0.1** | Chốt quyết định, ghi ADR | 23 ADR có mặt trong `docs/DECISIONS.md` | ✅ xong |
+| **M0.1** | Chốt quyết định, ghi ADR | 25 ADR có mặt trong `docs/DECISIONS.md` | ✅ xong |
 | **M0.2** | `git init`; `CLAUDE.md`; `docs/`; `.gitignore`; `.claude/settings.json` + 8 slash command | `git status` sạch, `/plan-task` gọi được | ✅ xong |
-| **M0.3** | `pom.xml`; `Launcher` tách `App`; `config/AppPaths`; `logback.xml` ghi file có rolling; `config.properties` sinh lần chạy đầu; cửa sổ trống mở được | `mvn verify` pass; app mở; có file log trong `%APPDATA%/SalesManager/logs/` | 3–4 ngày |
+| **M0.3** | `pom.xml`; `Launcher` tách `App`; `config/AppPaths`; `logback.xml` ghi file có rolling; `config.properties` sinh lần chạy đầu; cửa sổ trống mở được | `mvn verify` pass; app mở; có file log trong `%APPDATA%/SalesManager/logs/` | ✅ xong |
 
 > M0.3 là task **LARGE** (`pom.xml` + dependency + nơi lưu dữ liệu người dùng). Cần plan riêng + "go".
 
@@ -23,9 +23,9 @@ Cập nhật: 02/10/2026. Nguồn yêu cầu: `sales-app-spec-javafx.md` v3. Quy
 | ID | Nội dung | Bảng DB mới | Test bắt buộc | Ước (tuần) |
 |---|---|---|---|---|
 | **M1** | Hikari + Flyway chạy khi khởi động **trước** màn hình chính (lỗi → báo rõ và thoát); `V1__init.sql`; seed `province`/`ward`; `sales_rep`; `CustomerRepository` | `province`, `ward`, `customer_group`, `customer`, `sales_rep`, `app_setting` | Repository integration test chạy qua migration thật trên `salesmanager_test`; **guard** fail nếu tên DB không kết thúc `_test` | 1–1.5 |
-| **M2** | Khung UI: sidebar trái + nội dung phải, `SceneNavigator`, `DialogService`, `FxmlLoaderFactory`, AtlantaFX sáng/tối; **chốt nền tảng thiết kế** (thang 8px, thang cỡ chữ, bảng màu, 3 màu trạng thái) trong `base.css`; `messages_vi.properties`; **màn hình Danh sách khách hàng** với `FilteredList`, lọc kênh/tỉnh/phường/hạng/rep, đủ 4 trạng thái | — | TestFX: "mở app → thấy danh sách" | 1.5 |
+| **M2** | Khung UI: sidebar trái + nội dung phải, `SceneNavigator`, `DialogService`, `FxmlLoaderFactory`, AtlantaFX sáng/tối; **chốt nền tảng thiết kế** (thang 8px, thang cỡ chữ, bảng màu, 3 màu trạng thái) trong `ui/styles/main.css`; `messages_vi.properties`; **màn hình Danh sách khách hàng** với `FilteredList`, lọc kênh/tỉnh/phường/hạng/rep, đủ 4 trạng thái | — | TestFX: "mở app → thấy danh sách" | 1.5 |
 | **S1** | **Spike `jpackage`** một lần cho sớm — chỉ cần ra file `.msi` mở được | — | Thủ công | 0.5 ngày |
-| **M3** | Hồ sơ khách (tab doanh số/công nợ để rỗng, điền ở M6–M7); Cài đặt kênh khách + bảng giá + chính sách nợ + **ngày nhắc tự đặt**; danh sách rep + gán khách cho rep; `util/Validator` | `product`, `product_group`, `price_tier` | Unit test Validator; "khách để trống → lấy chính sách của kênh"; "khách có giá trị riêng → ghi đè" | 1 |
+| **M3** | Hồ sơ khách (tab doanh số/công nợ để rỗng, điền ở M6–M7); Cài đặt kênh khách + bảng giá + chính sách nợ + **ngày nhắc tự đặt**; danh sách rep + gán khách cho rep; `utils/Validator` | `product`, `product_group`, `price_tier` | Unit test Validator; "khách để trống → lấy chính sách của kênh"; "khách có giá trị riêng → ghi đè" | 1 |
 | **M4** | ⚠️ **Backup + restore** — `pg_dump` khi đóng app, giữ N bản, restore được. **Phải xong trước khi nhập dữ liệu thật** | — | Backup → restore sang `salesmanager_test` → so số dòng từng bảng | 0.5 |
 | **M5a** | **Máy import dùng chung:** ánh xạ cột lưu trong DB, xem trước, lỗi từng dòng, một transaction, **upsert + `row_hash` + batch theo kỳ**, hủy lô, chạy nền hủy được | `import_batch`, `import_column_mapping` | 7 test ở spec mục 9.1 — **đây là bộ test quan trọng nhất của cả giai đoạn 1** | 1.5 |
 | **M5b** | Import **đơn hàng** + sản phẩm + quy đổi thùng/lẻ | `sales_order`, `order_item` | Quy đổi thùng↔lẻ khi file ghi lẫn hai đơn vị; `units_per_pack_at_sale` giữ nguyên khi đổi quy cách | 1 |

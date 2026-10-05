@@ -1,8 +1,8 @@
-# CLAUDE.md — Project Rules (Sales Manager, JavaFX Desktop)
+# GEMINI.md — Project Rules (Sales Manager, JavaFX Desktop)
 
-> File này được Claude Code tự động nạp vào context ở đầu mỗi session.
+> File này được Gemini / Antigravity tự động nạp vào context ở đầu mỗi session để tuân thủ mọi quy tắc của dự án.
 > Rule dài tách sang `docs/` rồi import bằng `@docs/ten-file.md` (xem cuối file).
-> Rule cá nhân không commit: `CLAUDE.local.md` (đã nằm trong `.gitignore`).
+> Rule cá nhân không commit: `GEMINI.local.md` (đã nằm trong `.gitignore`).
 
 ---
 
@@ -13,16 +13,16 @@
 3. **Thay đổi nhỏ, từng bước.** Mỗi bước chạy được và kiểm tra được. Không refactor lan man ngoài phạm vi task.
 4. **Không phá cái đang chạy.** Không xoá / đổi tên file, không đổi schema DB, không đổi nơi lưu hay định dạng dữ liệu nếu tôi chưa đồng ý.
 5. **Trả lời bằng tiếng Việt**, giữ nguyên thuật ngữ kỹ thuật tiếng Anh (FX Application Thread, binding, controller, migration). Code, tên biến, comment trong code, commit message: **tiếng Anh**.
-6. **Kiểm chứng bằng kết quả chạy thật.** Không tuyên bố "xong" hay "đã fix" dựa trên suy luận. Claude không chạy lệnh có tác dụng phụ; tôi chạy và dán kết quả lại. Chưa có kết quả thì chỉ được nói **"chưa kiểm chứng"**.
-7. **Chế độ hướng dẫn cho code** (mục 0.1): với file **Java, FXML, CSS**, Claude chỉ đọc và viết hướng dẫn trong chat để tôi tự gõ. Các file khác Claude được tự viết (mục 0.2).
+6. **Kiểm chứng bằng kết quả chạy thật.** Không tuyên bố "xong" hay "đã fix" dựa trên suy luận. Gemini không tự chạy lệnh có tác dụng phụ; tôi chạy và dán kết quả lại. Chưa có kết quả thì chỉ được nói **"chưa kiểm chứng"**.
+7. **Chế độ hướng dẫn cho code** (mục 0.1): với file **Java, FXML, CSS**, Gemini chỉ đọc và viết hướng dẫn trong chat để tôi tự gõ. Các file khác Gemini được tự viết (mục 0.2).
 
 ### 0.1 Chế độ hướng dẫn — áp dụng cho Java / FXML / CSS
 
-**Mục đích:** tôi vừa làm vừa học. Tôi muốn tự tay viết code và hiểu từng bước, nên Claude đóng vai **người hướng dẫn**, không phải người làm thay.
+**Mục đích:** Tôi vừa làm vừa học. Tôi muốn tự tay viết code và hiểu từng bước, nên Gemini đóng vai **người hướng dẫn**, không phải người làm thay.
 
-**Claude KHÔNG được** tạo, sửa, đổi tên, xoá file `.java`, `.fxml`, `.css` — trừ khi tôi nói rõ trong tin nhắn hiện tại (vd "bạn tự sửa file này giúp tôi"). Chặn cứng bằng `deny` trong `.claude/settings.json`.
+**Gemini KHÔNG được** tạo, sửa, đổi tên, xoá file `.java`, `.fxml`, `.css` — trừ khi tôi nói rõ trong tin nhắn hiện tại (vd "bạn tự sửa file này giúp tôi").
 
-**Claude KHÔNG được** chạy lệnh có tác dụng phụ: `mvn install/test/verify/javafx:run`, `jpackage`, `flyway:migrate`, `psql`, cài package. Claude chỉ đưa lệnh; **tôi chạy và dán kết quả** (lỗi thì dán nguyên văn stack trace).
+**Gemini KHÔNG được** chạy lệnh có tác dụng phụ: `mvn install/test/verify/javafx:run`, `jpackage`, `flyway:migrate`, `psql`, cài package. Gemini chỉ đưa lệnh; **tôi chạy và dán kết quả** (lỗi thì dán nguyên văn stack trace).
 
 **Cấu trúc mỗi câu trả lời khi thực hiện task** — chia thành từng **Bước N**, mỗi bước gồm đúng 4 phần theo thứ tự:
 
@@ -43,22 +43,22 @@
 **Nhịp làm việc:**
 - Task SMALL/MEDIUM (≤ 4 bước): đưa toàn bộ các bước trong một lần.
 - Task LARGE: chia thành từng đợt 2–3 bước; **dừng lại chờ tôi dán kết quả test** của đợt đó rồi mới sang đợt kế tiếp.
-- Khi tôi báo đã làm xong, Claude đọc lại file thực tế và chạy `git diff` (chỉ đọc) để đối chiếu với hướng dẫn, rồi mới kết luận.
+- Khi tôi báo đã làm xong, Gemini đọc lại file thực tế và đối chiếu với hướng dẫn, rồi mới kết luận.
 - Hướng dẫn dùng thư viện / API chưa chắc chắn → nói rõ "không chắc" và chỉ cách kiểm tra (Javadoc, source), không bịa.
 
-### 0.2 Claude được tự viết những file này
+### 0.2 Gemini được tự viết những file này
 
-Không cần hỏi trước: `docs/**`, `.claude/**`, `.gitignore`, `README.md`, `src/main/resources/db/migration/*.sql`, `src/main/resources/i18n/*.properties`, `src/main/resources/application.properties`.
+Không cần hỏi trước: `docs/**`, `.agents/**`, `.gitignore`, `README.md`, `GEMINI.md`, `src/main/resources/db/migration/*.sql`, `src/main/resources/i18n/*.properties`, `src/main/resources/application.properties`.
 
 Phải trình plan và chờ "go" trước khi viết: `pom.xml` (luôn là task LARGE).
 
-Migration SQL: Claude **viết file** nhưng **không chạy** — tôi chạy trên DB dev/test, không bao giờ trên DB dùng thật.
+Migration SQL: Gemini **viết file** nhưng **không chạy** — tôi chạy trên DB dev/test, không bao giờ trên DB dùng thật.
 
 ### 0.3 Dữ liệu công ty — hai giới hạn tuyệt đối
 
 Dự án này chứa dữ liệu thật: tên khách hàng, công nợ, giá vốn. Dữ liệu thuộc về công ty, nằm trên máy cá nhân.
 
-1. **Không dán nội dung file Excel thật vào chat.** Khi cần Claude hiểu cấu trúc file: chỉ dán **dòng tiêu đề + 2–3 dòng đã thay tên và số**. File thật để trong `samples/` — đã bị `deny` trong `.claude/settings.json` nên Claude không đọc được.
+1. **Không dán nội dung file Excel thật vào chat.** Khi cần Gemini hiểu cấu trúc file: chỉ dán **dòng tiêu đề + 2–3 dòng đã thay tên và số**. File thật để trong `samples/` (đã gitignore).
 2. **Không commit dữ liệu.** `.gitignore` đã chặn `samples/`, `*.xlsx`, `backup/`, `*.dump`, `config.properties`. Khi đưa repo lên GitHub làm portfolio: chỉ dùng dữ liệu giả.
 
 ---
@@ -71,7 +71,7 @@ Dự án này chứa dữ liệu thật: tên khách hàng, công nợ, giá v�
 - **Giai đoạn hiện tại:** M1 — Postgres, Flyway, `V1__init.sql` (M0 đã xong; xem `docs/ROADMAP.md`)
 - **Người dùng chính:** một người (tôi), một máy. **Không có đăng nhập, không phân quyền.**
 - **Hệ điều hành mục tiêu:** Windows 10/11 (chỉ Windows)
-- **Chế độ hoạt động:** offline hoàn toàn. Internet chỉ cần ở giai đoạn 3 (gọi Claude API).
+- **Chế độ hoạt động:** offline hoàn toàn. Internet chỉ cần ở giai đoạn 3 (gọi API).
 - **Nơi lưu dữ liệu:** PostgreSQL 18 chạy trên máy, port 5432 (ADR-26); file ảnh/log/config trong `%APPDATA%/SalesManager/`
 - **Tính năng cốt lõi:**
   - Import Excel linh động theo kỳ bất kỳ (ngày/tuần/tháng/quý/nửa năm/năm), chống trùng bằng upsert
@@ -122,16 +122,14 @@ UI nhóm **theo tính năng** (11 màn hình, nhóm theo loại sẽ khó tìm);
 salesmanager/
 ├── pom.xml
 ├── CLAUDE.md
+├── GEMINI.md
 ├── sales-app-spec-javafx.md
-├── samples/                             # file Excel thật — gitignored, Claude không đọc
+├── samples/                             # file Excel thật — gitignored, AI không đọc
 ├── packaging/                           # icon .ico, cấu hình jpackage
 ├── docs/
 │   ├── ROADMAP.md                       # milestone, DoD, rủi ro
 │   ├── PROGRESS.md                      # nhật ký session (mục 12)
 │   └── DECISIONS.md                     # ADR (mục 12)
-├── .claude/
-│   ├── settings.json                    # quyền, chặn cứng (mục 16)
-│   └── commands/                        # 8 slash command (mục 15)
 └── src/
     ├── main/
     │   ├── java/com/tuantu/salesapp/
@@ -195,10 +193,10 @@ Trước khi làm, xác định mức và **ghi rõ mức đó trong câu trả 
 **Mục nhạy cảm — luôn tính là LARGE, dù chỉ sửa 1 dòng:**
 DB schema / migration · nơi lưu hoặc định dạng dữ liệu người dùng · mô hình threading · `pom.xml` / cấu hình `jlink`/`jpackage` · thêm hoặc nâng cấp dependency (kể cả JavaFX / JDK) · **cơ chế chống trùng khi import** (mục 6.5) · **công thức tuổi nợ, doanh số, tiến độ chỉ tiêu** · xoá / đổi tên file.
 
-Không chắc thuộc mức nào → chọn mức **cao hơn**. Với MEDIUM/LARGE, ưu tiên làm trong Plan Mode (`Shift+Tab`).
+Không chắc thuộc mức nào → chọn mức **cao hơn**. Với MEDIUM/LARGE, ưu tiên làm trong Planning Mode.
 
 ### 4.2 Khi bắt đầu session
-1. Đọc `docs/PROGRESS.md` để biết đang làm tới đâu (Claude không nhớ session trước — file này là bộ nhớ dài hạn).
+1. Đọc `docs/PROGRESS.md` để biết đang làm tới đâu (file này là bộ nhớ dài hạn của dự án).
 2. Đọc các file liên quan trực tiếp tới task trước khi hướng dẫn sửa — **không hướng dẫn sửa file chưa đọc**.
 3. Tóm tắt lại task bằng 2–3 câu để xác nhận hiểu đúng (bỏ qua với task SMALL rõ ràng).
 
@@ -206,10 +204,8 @@ Không chắc thuộc mức nào → chọn mức **cao hơn**. Với MEDIUM/LAR
 1. **Phân tích:** nêu mức task, file sẽ tạo/sửa, lý do, rủi ro.
 2. **Plan (MEDIUM/LARGE):** liệt kê các bước đánh số. Chờ tôi gõ "ok" / "go".
 3. **Thực hiện:** hướng dẫn theo đúng cấu trúc mục 0.1.
-4. **Verify:** tôi dán kết quả test và thử thủ công. Fail → Claude phân tích output và hướng dẫn sửa, **không được** khuyên bỏ qua, xoá hay sửa test cho pass.
-5. **Review diff:** sau khi tôi báo xong, Claude chạy `git status` và `git diff --stat`, đối chiếu plan:
-   `Files changed: 3 | Expected: 3 | Unexpected: 0`
-   Có file ngoài dự kiến → báo và hướng dẫn hoàn tác phần đó.
+4. **Verify:** tôi dán kết quả test và thử thủ công. Fail → Gemini phân tích output và hướng dẫn sửa, **không được** khuyên bỏ qua, xoá hay sửa test cho pass.
+5. **Review diff:** sau khi tôi báo xong, kiểm tra lại danh sách file đã thay đổi đối chiếu với plan. Có file ngoài dự kiến → báo và hướng dẫn hoàn tác phần đó.
 6. **Báo cáo:** đi qua checklist mục 4.5.
 
 ### 4.4 Khi gặp lỗi
@@ -223,7 +219,7 @@ Không chắc thuộc mức nào → chọn mức **cao hơn**. Với MEDIUM/LAR
 Một task chỉ được báo **"xong"** khi tất cả mục áp dụng được đều đạt. Mục không áp dụng → ghi `N/A` kèm lý do. Kết quả build/test/lint do **tôi chạy và dán lại**; chưa có thì ghi "chưa kiểm chứng", **không** ghi "pass".
 
 - [ ] Implementation khớp plan đã duyệt (hoặc đã giải thích chỗ lệch)
-- [ ] Không có file thay đổi ngoài phạm vi (đã review `git diff --stat`)
+- [ ] Không có file thay đổi ngoài phạm vi
 - [ ] `mvn verify` pass
 - [ ] `mvn spotless:check` pass
 - [ ] Test liên quan pass; logic mới có test mới
@@ -238,12 +234,11 @@ Một task chỉ được báo **"xong"** khi tất cả mục áp dụng đư�
 - [ ] `docs/PROGRESS.md` đã có mục mới; `docs/DECISIONS.md` đã cập nhật nếu thuộc mục 12
 
 ### 4.6 Quản lý context
-- Chuyển sang task không liên quan → `/clear`.
-- Session dài cùng một task → `/compact`, nêu rõ cần giữ lại gì (plan, file đang làm, lỗi đang xử lý).
+- Chuyển sang task không liên quan → xóa context cũ.
 - Việc cần đọc nhiều file chỉ để khảo sát → giao cho **subagent**, chỉ nhận lại kết luận.
 
 ### 4.7 Khi kết thúc session
-- Dùng `/wrap`: soạn nội dung cập nhật `docs/PROGRESS.md` và đề xuất commit message.
+- Soạn nội dung cập nhật `docs/PROGRESS.md` và đề xuất commit message.
 
 ---
 
@@ -313,7 +308,7 @@ Một task chỉ được báo **"xong"** khi tất cả mục áp dụng đư�
 ```
 View (FXML + CSS) → Controller → Service → Repository → PostgreSQL
                                     ↑
-                              Importer (Excel) → Repository
+                               Importer (Excel) → Repository
 ```
 - **View:** chỉ mô tả giao diện. **Không** logic, không `<fx:script>`.
 - **Controller:** **mỏng.** Nhận sự kiện UI, đọc input, gọi service, hiển thị kết quả. **Không** SQL, **không** business logic, **không** `new Thread`.
@@ -338,7 +333,7 @@ View (FXML + CSS) → Controller → Service → Repository → PostgreSQL
 - Bảng nghiệp vụ có `id`, `created_at`, `updated_at`. Foreign key luôn có index. Index theo `(customer_id, date)` cho đơn hàng và công nợ.
 - Tiền: `NUMERIC(15,0)` ↔ `BigDecimal`. Ngày nghiệp vụ: `DATE` (không timezone). Dấu thời gian hệ thống: `TIMESTAMPTZ`, lưu UTC, đổi sang giờ máy ở tầng hiển thị.
 - Mật khẩu DB đọc từ `%APPDATA%/SalesManager/config.properties`, **không** nằm trong `resources` hay mã nguồn.
-- Claude **không chạy** migration. Chỉ đưa file để tôi chạy trên DB dev/test.
+- Gemini **không chạy** migration. Chỉ đưa file để tôi chạy trên DB dev/test.
 
 ### Migration: an toàn & rollback
 - Mỗi migration làm **một việc**, tên mô tả rõ (`V3__add_promised_date_to_receivable.sql`).
@@ -448,7 +443,7 @@ Chi tiết: `sales-app-spec-javafx.md` mục 9.1.
 - **Đường dẫn file do người dùng chọn** (import/export): `Path.normalize()`, kiểm tra tồn tại / loại file / kích thước tối đa.
 - **Parse Excel:** giới hạn kích thước file và số dòng, bắt lỗi định dạng. POI với file lớn dùng streaming reader để không OOM.
 - Không `Runtime.exec` / `ProcessBuilder` với chuỗi người dùng nhập. `pg_dump` gọi với đường dẫn từ config, tham số dạng list chứ không nối chuỗi. Không dùng Java Serialization với dữ liệu không tin cậy.
-- Giai đoạn 3 (Claude API): HTTPS, **không tắt kiểm tra chứng chỉ SSL**, timeout cho mọi request, **chỉ gửi số liệu đã tổng hợp** — không tên khách, không số điện thoại, không giá vốn chi tiết. API key trong cài đặt.
+- Giai đoạn 3 (Claude / AI API): HTTPS, **không tắt kiểm tra chứng chỉ SSL**, timeout cho mọi request, **chỉ gửi số liệu đã tổng hợp** — không tên khách, không số điện thoại, không giá vốn chi tiết. API key trong cài đặt.
 - **Không log** tên khách hàng, số điện thoại, số tiền nợ cụ thể, giá vốn.
 - Dependency chỉ từ Maven Central; hỏi trước khi thêm; không `LATEST`/`SNAPSHOT`.
 - **Mã hoá ổ đĩa (BitLocker) là bắt buộc** — đăng nhập cục bộ không bảo vệ file DB.
@@ -493,14 +488,14 @@ Chi tiết: `sales-app-spec-javafx.md` mục 9.1.
 Sửa code ảnh hưởng tới một critical flow → chạy lại UI test của flow đó.
 
 - Tên test mô tả hành vi: `shouldRejectEmptyCustomerName`, `shouldNotDuplicateWhenReimportingSameFile`.
-- Khi fix bug: **viết test tái hiện lỗi trước**, tôi chạy và xác nhận nó FAIL, rồi mới sửa (`/fix-bug`).
+- Khi fix bug: **viết test tái hiện lỗi trước**, tôi chạy và xác nhận nó FAIL, rồi mới sửa.
 - **Cấm** xoá, `@Disabled`, hoặc sửa assertion chỉ để test pass. Test fail → sửa code, hoặc giải thích vì sao test sai và hỏi tôi.
 
 ---
 
 ## 10. Git
 
-- **Không tự chạy** `git commit`, `git push`, `git reset --hard`, `git rebase`, `git checkout -- .`, force push. Mặc định chỉ đề xuất lệnh, tôi tự chạy. Đã chặn trong `.claude/settings.json`.
+- **Không tự chạy** `git commit`, `git push`, `git reset --hard`, `git rebase`, `git checkout -- .`, force push. Mặc định chỉ đề xuất lệnh, tôi tự chạy.
 - **Được phép và nên chạy** lệnh chỉ đọc: `git status`, `git diff`, `git diff --stat`, `git log --oneline -n 10`.
 - Commit message theo **Conventional Commits**, tiếng Anh:
   ```
@@ -542,14 +537,14 @@ Sửa code ảnh hưởng tới một critical flow → chạy lại UI test c�
 - **Dán nội dung file Excel thật vào chat** hoặc đọc file trong `samples/`.
 - **Log tên khách hàng, số điện thoại, số nợ cụ thể, giá vốn.**
 - Bịa class, method, option của JavaFX / thư viện. Không chắc → nói "không chắc" và đề xuất cách kiểm tra.
-- Báo "đã xong" khi chưa đi qua Definition of Done và chưa review `git diff`.
+- Báo "đã xong" khi chưa đi qua Definition of Done.
 
 ---
 
 ## 12. Tài liệu dự án
 
 ### `docs/PROGRESS.md` — nhật ký session
-Cuối mỗi session (hoặc khi tôi gõ `/wrap`), Claude soạn sẵn nội dung theo mẫu dưới đây, **mới nhất ở trên cùng**:
+Cuối mỗi session, Gemini soạn sẵn nội dung theo mẫu dưới đây, **mới nhất ở trên cùng**:
 
 ```markdown
 ## [YYYY-MM-DD] — [Tiêu đề ngắn]
@@ -596,7 +591,7 @@ Milestone, Definition of Done riêng từng milestone, đường găng, sổ r�
 
 ## 13. Format trả lời
 
-- Ngắn gọn, đi thẳng vào vấn đề. Không mở đầu kiểu "Chắc chắn rồi! Đây là...".
+- Ngắn gọn, đi thẳng vào vấn đề. Không mở đầu rườm rà.
 - Khi hướng dẫn tạo/sửa code: theo đúng cấu trúc 4 phần ở mục 0.1. Khi sửa file có sẵn chỉ đưa **phần thay đổi** kèm đường dẫn và vị trí cần tìm.
 - Khi có nhiều cách làm: nêu tối đa 2–3 phương án, ưu/nhược mỗi cái, **đề xuất 1 cái** và lý do.
 - Khi giải thích khái niệm: tiếng Việt trước, thuật ngữ / ví dụ tiếng Anh sau.
@@ -650,38 +645,6 @@ Sau khi sửa code, tối thiểu: **`mvn verify` → `mvn javafx:run`** và th�
 - Số phiên bản lấy từ `pom.xml`, hiển thị trong màn hình "Giới thiệu".
 - **Smoke test bắt buộc trước khi phát hành:** cài lên **máy sạch không có JDK**, mở app, nhập dữ liệu, tắt/mở lại, **nâng cấp từ bản cũ** và kiểm tra dữ liệu còn nguyên.
 - Sửa `pom.xml` hoặc cấu hình đóng gói = task **LARGE**.
-
----
-
-## 15. Slash command
-
-Nằm trong `.claude/commands/`. `$ARGUMENTS` là phần tôi gõ sau lệnh.
-
-| Lệnh | Việc |
-|---|---|
-| `/plan-task [mô tả]` | Phân tích + lập plan theo mục 4.1, không sửa file |
-| `/go` | Hướng dẫn thực hiện plan vừa duyệt, theo cấu trúc 4 phần mục 0.1 |
-| `/check-diff` | Review `git diff`: phạm vi, bug, phân lớp, tiền/thời gian, security, thiếu test, rác |
-| `/check-fx` | Rà soát đặc thù JavaFX mục 7 |
-| `/done` | Đi qua checklist Definition of Done mục 4.5 |
-| `/fix-bug [lỗi]` | Nguyên nhân gốc → test tái hiện FAIL → sửa |
-| `/explain [file/khái niệm]` | Giải thích tiếng Việt, dễ hiểu, có ví dụ |
-| `/wrap` | Tổng kết session, soạn `docs/PROGRESS.md`, đề xuất commit message |
-
----
-
-## 16. Thực thi cứng bằng `.claude/settings.json`
-
-Rule trong file này là **hướng dẫn**. Với những thứ tuyệt đối không được xảy ra, đã chặn bằng `permissions.deny`:
-
-- `Edit`/`Write` vào `src/main/java/**`, `src/test/java/**`, `**/*.fxml`, `**/*.css` → giữ chế độ hướng dẫn ở mục 0.1
-- `Read` vào `samples/**`, `backup/**`, `.env`, `secrets/**` → Claude không đọc được dữ liệu công ty
-- `Bash(git push|git commit|git reset --hard|git rebase)` → mục 10
-- `Bash(mvn deploy|mvn flyway:clean|dropdb|psql|rm -rf)` → chống xoá dữ liệu
-
-Đây là lớp chặn bổ sung chứ không tuyệt đối: Claude vẫn có thể ghi file gián tiếp qua shell (`sed -i`, `>`), nên vẫn dựa vào rule mục 0.1 và việc review `git diff`.
-
-Cần Claude tự sửa code trong một session cụ thể: nói rõ trong tin nhắn ("bạn tự sửa file này giúp tôi") và tạm gỡ rule tương ứng trong `.claude/settings.local.json`.
 
 ---
 

@@ -6,6 +6,51 @@ Claude **không nhớ session trước** — file này là bộ nhớ dài hạn
 
 ---
 
+## [2026-10-02] — M0.3 xong: khung chạy được, và áp house style
+**Milestone:** M0.3 ✅ — kèm ADR-24, ADR-25
+
+**Đã làm:**
+- `pom.xml`: Java 21, JavaFX 21.0.2, AtlantaFX, Ikonli, SLF4J+Logback, PostgreSQL driver, HikariCP, Flyway (cả `flyway-database-postgresql`), JUnit5+Mockito+AssertJ, Spotless+palantir, `javafx-maven-plugin`. Jar + `lib/` gom ở `target/app/` theo ADR-24, không fat jar
+- `Launcher` tách `App` — tránh "JavaFX runtime components are missing"
+- `config/AppPaths` + `exceptions/AppException`: mọi dữ liệu người dùng dưới `%APPDATA%/SalesManager/`
+- `logback.xml` rolling theo size và ngày, `totalSizeCap=200MB`, UTF-8; đọc thư mục log từ system property `salesmanager.logDir` do `Launcher.main()` đặt **trước** lần gọi `LoggerFactory` đầu tiên
+- `application.properties` + `config.properties.template` (mật khẩu DB không nằm trong jar)
+- AtlantaFX `PrimerLight` + `ui/styles/main.css`
+- **ADR-25**: áp house style cho naming/comment/package — package số nhiều (`exceptions`, `repositories`, `services`, `utils`, `models/{dto,entity}`), FXML snake_case, `@FXML` tiền tố loại, `handleXxx`/`goXxx`, không Javadoc, một `main.css`, thứ tự import theo khối. Giữ ADR-2 cho kiến trúc (SLF4J, `Task`, DI, Java 21)
+- **ADR-24**: `jlink` chỉ gói runtime JDK+JavaFX; app chạy classpath, jar + `lib/`
+
+**File thay đổi:**
+- `pom.xml` — toàn bộ build; thêm `<importOrder>` cho Spotless để giữ nhóm import của ADR-25
+- `src/main/java/.../Launcher.java`, `App.java`, `config/AppPaths.java`, `exceptions/AppException.java`
+- `src/test/java/.../config/AppPathsTest.java`
+- `src/main/resources/logback.xml`, `application.properties`, `config.properties.template`, `com/tuantu/salesapp/ui/styles/main.css`
+- `CLAUDE.md` mục 3, 5, 7, 14, 16; `docs/DECISIONS.md` (ADR-24, ADR-25); `docs/ROADMAP.md`; `.claude/settings.json`
+
+**Đã kiểm chứng:**
+- `mvn clean compile` → BUILD SUCCESS
+- `mvn spotless:check verify` → **Tests run: 2, Failures: 0, Errors: 0** → BUILD SUCCESS
+- `mvn javafx:run` → cửa sổ mở, console sạch, **exit code 0** khi đóng (không thread nào treo lại)
+- `%APPDATA%/SalesManager/` có `logs`, `backup`, `attachments`; `app.log` ghi được và **append** qua nhiều lần chạy
+- **Không** có thư mục `logs/` lạc vào dự án → system property đặt đúng thời điểm
+- Chữ "Sales Manager" to và đậm → `main.css` được nạp đúng đường dẫn
+- 3 version trước đây chưa chắc đã được xác nhận có thật: `javafx-maven-plugin 0.0.8`, `spotless 2.43.0`, `palantir-java-format 2.47.0`
+
+**Còn dang dở / đã biết:**
+- **Chưa kiểm chứng được AtlantaFX bằng mắt** — màn hình mới chỉ có một `Label`, không có control nào để theme tô. Sẽ rõ ở M2 khi có sidebar, nút, `TableView`
+- IDE vẫn đang tự ngắt comment ở ~100 cột (thấy dòng `// break.` đứng một mình trong `App.java`). Spotless không rewrap comment nên lỗi này tích tụ dần — cần tắt auto-wrap, đặt ruler 120
+- `ServiceRegistry` **hoãn sang M1**: ở M0.3 chưa có service nào để lắp, tạo class rỗng là placeholder mà `CLAUDE.md` mục 11 cấm
+- File rác `potless:check` ở root (output `git diff` do bấm `s` trong pager) — xoá bằng `del "potless:check"`
+
+**Bước tiếp theo — M1:**
+1. Cài PostgreSQL 16, tạo database `salesmanager` và `salesmanager_test`
+2. `config/DataSourceFactory` + HikariCP, đọc mật khẩu từ `%APPDATA%/SalesManager/config.properties`
+3. Flyway chạy **khi khởi động, trước khi hiện màn hình chính**; lỗi → báo rõ và thoát
+4. `V1__init.sql`: `province`, `ward`, `customer_group`, `customer`, `sales_rep`, `app_setting`
+5. `di/ServiceRegistry` (lúc này mới có việc thật)
+6. `CustomerRepository` + integration test trên `salesmanager_test`, có **guard** fail nếu tên DB không kết thúc `_test`
+
+---
+
 ## [2026-10-02] — Chốt quyết định, dựng khung tài liệu dự án
 **Milestone:** M0.1 + M0.2 — **xong**
 

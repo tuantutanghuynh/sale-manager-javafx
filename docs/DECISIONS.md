@@ -47,7 +47,7 @@ Mới nhất ở dưới cùng. Khi nào phải ghi ADR: `CLAUDE.md` mục 12.
 
 ## ADR-7: Viết FXML tay; không dựng app bằng WebView — 2026-10-02
 **Bối cảnh:** câu hỏi "có cách nào đẹp hơn Scene Builder hay viết tay không".
-**Quyết định:** viết FXML tay, Scene Builder chỉ mở để xem trước. Giao diện đẹp đến từ AtlantaFX + Ikonli + `base.css`. WebView chỉ xét ở M16 cho đúng màn hình dashboard.
+**Quyết định:** viết FXML tay, Scene Builder chỉ mở để xem trước. Giao diện đẹp đến từ AtlantaFX + Ikonli + CSS riêng (ADR-25 chốt lại là một file `ui/styles/main.css`). WebView chỉ xét ở M16 cho đúng màn hình dashboard.
 **Lý do:** Scene Builder và viết tay sinh ra **cùng một file FXML và cùng một giao diện** — công cụ soạn không quyết định độ đẹp. Scene Builder sinh nhiều `prefWidth` cứng (phá responsive) và hay ghi đè phần sửa tay.
 **Phương án đã loại:** WebView cho cả app (WebKit cũ, gõ chữ lệch giao diện, phải bảo trì cầu nối Java↔JS cho mọi màn hình); Compose Multiplatform / Electron / Tauri (đổi hẳn ngôn ngữ, bỏ toàn bộ spec).
 **Hệ quả:** phải chốt một nền tảng thiết kế ở M2 (thang 8px, một thang cỡ chữ, một bảng màu, 3 màu trạng thái) và mọi màn hình sau dùng lại.
@@ -179,3 +179,55 @@ Ngoài ra: không log tên khách, số điện thoại, số nợ cụ thể, g
 - `pom.xml` cần `maven-jar-plugin` ghi `Class-Path` vào manifest với prefix `lib/`, và `maven-dependency-plugin` copy dependency sang `target/app/lib/`. Output gom về `target/app/` để `jpackage --input` trỏ vào một chỗ.
 - **Lệnh `jpackage` đầy đủ chưa được kiểm chứng** — đó là việc của **spike S1** sau M2. Nếu S1 cho thấy cách này không chạy, phương án dự phòng là `jpackage` không kèm `--runtime-image` (bộ cài to hơn nhưng chắc chắn chạy).
 - `CLAUDE.md` mục 14 đã được sửa cho khớp quyết định này.
+
+## ADR-25: Áp house style cho naming / comment / package, giữ ADR-2 cho kiến trúc — 2026-10-02
+**Bối cảnh:** skill `java-layered-style` mô tả house style Java cá nhân. ADR-2 đã chọn `CLAUDE.md` thắng khi hai bên chống nhau, nhưng phần lớn skill **không** chống nhau với `CLAUDE.md` — nó chỉ quy định cách đặt tên, cách comment và cách xếp package. Đổi những thứ đó lúc này gần như miễn phí vì M2 chưa viết FXML nào.
+**Quyết định — lấy từ house style:**
+- Package số nhiều: `exceptions/`, `repositories/`, `services/`, `utils/`; `domain/` → `models/{dto,entity}/`
+- FXML **snake_case** (`customer_list.fxml`), đặt trong `resources` cùng package path với controller
+- **Một** stylesheet duy nhất `com/tuantu/salesapp/ui/styles/main.css`
+- Field `@FXML` tiền tố theo loại: `txtSearch`, `lblMessage`, `btnSave`, `cbGroup`, `dpFromDate`, `colQty`, `tableCustomer`
+- Handler `handleXxx()` cho hành động, `goXxx()` cho điều hướng
+- Method async `xxxAsync`, tên thread kebab-case + `-thread`
+- **Không dùng Javadoc ở đâu cả** — mọi comment là `//`, kể cả API public của service
+- Comment `//` trên getter mô tả *field*; cặp getter/setter dính liền nhau
+- Thứ tự import: `java.*` → `com.tuantu.salesapp.*` → `javafx.*` → còn lại
+- `AppException` đúng hai constructor `(message)` và `(message, cause)`, **bỏ field `code`**
+
+**Quyết định — giữ ADR-2, KHÔNG lấy từ house style:**
+| House style | Giữ nguyên | Lý do |
+|---|---|---|
+| `e.printStackTrace()`, `System.out.printf("[LOG]...")` | SLF4J + Logback | App quản lý công nợ thật; repository nuốt lỗi rồi `return false` làm lỗi import biến mất không dấu vết |
+| Hand-rolled daemon thread, không dùng `Task` | `Task` + executor dùng chung | Cần tiến trình và huỷ cho import/báo cáo (spec 9.1); `Task` có sẵn `updateProgress` và `isCancelled` |
+| `Service.getInstance()` singleton tĩnh | constructor DI + `ServiceRegistry` | Spec yêu cầu test service không mở UI |
+| Repository trả `null`, nuốt `SQLException` | lỗi hạ tầng nổi lên thành `AppException` | Cùng lý do dòng 1 |
+| Java 17 | Java 21 | Spec mục 3 chốt 21 |
+| `ui/controllers/` phẳng | `ui/<tính-năng>/` | 12 màn hình, ~25 controller trong một thư mục thì không tìm được (ADR-3) |
+
+**Phương án đã loại:** theo skill hoàn toàn (đảo ADR-2 — mất khả năng chẩn đoán lỗi và khả năng test); bỏ hẳn skill (mất style cá nhân mà không được gì, vì phần naming không ảnh hưởng kiến trúc).
+**Hệ quả:** `CLAUDE.md` mục 3, 5, 7, 16 đã sửa. Đổi tên 4 thư mục Java + dời `css/` sang `ui/styles/`. Không có file `.java` nào phải sửa vì `AppException`/`AppPaths` còn chưa được tạo.
+
+## ADR-26: Dùng PostgreSQL 18 (port 5432), không phải 16 — 2026-10-02
+**Bối cảnh:** ADR-1 chốt PostgreSQL 16. Khi bắt tay vào M1 mới phát hiện máy đã cài sẵn **hai** bản: 17 ở port 5433 và **18 ở port 5432**. Bản 16 không có mặt.
+**Quyết định:** dùng **PostgreSQL 18, port 5432**. Không đụng gì tới bản 17.
+**Lý do:** (1) Bản 18 đang ở port mặc định 5432, khớp với `db.url` đã viết trong `application.properties`. (2) Bản 17 ở 5433 phục vụ việc khác (có `dvdrental`, `reatilpos`) — không nên can thiệp. (3) `pg_dump` của bản 18 khớp đúng server 18; lẫn lộn client 17 với server 18 sẽ làm backup ở M4 lỗi.
+**Phương án đã loại:** cài thêm bản 16 cho đúng ADR-1 (thừa một server nữa trên máy, không được gì); dùng bản 17 (phải đổi port trong cấu hình, và đụng vào server đang phục vụ việc khác).
+**Hệ quả:**
+- `CLAUDE.md` mục 1 và 2, spec mục 3 đã sửa từ 16 sang 18.
+- **Chưa kiểm chứng:** JDBC driver đang pin `42.7.3` — không chắc hỗ trợ đầy đủ PostgreSQL 18. Sẽ biết ở M1 khi mở connection thật; lỗi thì nâng version driver (sửa một dòng `<properties>`).
+- Database `salesmanager` và `salesmanager_test` đã tạo, encoding `UTF8`.
+- Mật khẩu `postgres` đã phải reset qua thủ tục `pg_hba.conf` → `trust` → `ALTER USER` → khoá lại `scram-sha-256`. `pg_hba.conf.bak` còn trong thư mục `data/` để khôi phục nhanh nếu cần lần sau.
+
+## ADR-27: Collation tiếng Việt đặt ở cột, không ở database — 2026-10-02
+**Bối cảnh:** hai database tạo ra với `Encoding UTF8` nhưng `Collate English_United States.1252`. Encoding lo việc **lưu** tiếng Việt; collate lo việc **sắp xếp**. Với collate tiếng Anh, `ORDER BY name` xếp sai: `Đ` không nằm sau `D`, `Ă` `Â` không nằm cạnh `A`. Danh sách khách hàng sẽ trông lộn xộn.
+**Quyết định:** giữ nguyên database; khai `COLLATE "vi-VN-x-icu"` trên từng cột tên trong `V1__init.sql` (`province.name`, `ward.name`, `customer.name`, `sales_rep.name`, `product.name`).
+**Lý do:** migration là nguồn sự thật duy nhất của schema (`CLAUDE.md` mục 6). Collation đặt ở database chỉ tồn tại nhờ cách gõ `createdb` trên một máy cụ thể — không tái lập được, và rất dễ lệch giữa `salesmanager` và `salesmanager_test`, đúng loại lệch khiến test pass ở máy này fail ở máy khác. Đặt ở cột thì nằm trong file migration, ai chạy migration cũng có.
+**Phương án đã loại:** `DROP` + `CREATE DATABASE ... LOCALE_PROVIDER icu ICU_LOCALE 'vi-VN'` — mọi cột text tự đúng kể cả cột thêm sau, nhưng thêm một bước thủ công ngoài migration phải nhớ làm trên mỗi máy và cho cả DB test.
+**Hệ quả:** phải nhớ thêm `COLLATE "vi-VN-x-icu"` mỗi khi tạo cột tên mới — `/check-diff` sẽ kiểm. Đã xác nhận bản 18 có sẵn các collation `vi`, `vi-VN`, `vi-VN-x-icu`, `vi-x-icu`, `vi_VN`.
+
+## ADR-28: Seed đủ 34 tỉnh/thành, phường xã để trống — 2026-10-02
+**Bối cảnh:** ADR-12 chốt chọn tỉnh/phường từ bảng danh mục chứ không nhập chữ tự do. Danh sách phường xã sau sắp xếp hành chính có khoảng 3.300 bản ghi.
+**Quyết định:** `V1__init.sql` seed **đủ 34 tỉnh/thành**; bảng `ward` để trống, thêm dần khi gặp khách thật. Màn hình khách hàng cho phép thêm phường mới và lưu vào danh mục.
+**Lý do:** tên tỉnh là thứ phải chuẩn để báo cáo theo khu vực không bị tách đôi — seed đủ thì không bao giờ gõ sai. Phường xã thì chỉ cần của những khách thật sự có; seed 3.300 dòng làm file migration phình to mà 99% không bao giờ dùng tới.
+**Phương án đã loại:** seed đủ cả phường xã (migration lớn, khó review, chậm khi chạy test); để cả hai trống (mất lợi ích của danh mục).
+**Hệ quả:** màn hình khách hàng ở M2/M3 phải có luồng "thêm phường mới" — không chỉ là dropdown chỉ đọc. Khi danh mục hành chính thay đổi, thêm bản ghi mới chứ không sửa bản ghi cũ, để khách cũ giữ được khu vực lịch sử.

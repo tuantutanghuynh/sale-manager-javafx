@@ -1,0 +1,186 @@
+[1mdiff --git a/.claude/settings.json b/.claude/settings.json[m
+[1mindex fe9c7cb..87c4616 100644[m
+[1m--- a/.claude/settings.json[m
+[1m+++ b/.claude/settings.json[m
+[36m@@ -8,8 +8,8 @@[m
+       "Write(src/test/java/**)",[m
+       "Edit(src/main/resources/**/*.fxml)",[m
+       "Write(src/main/resources/**/*.fxml)",[m
+[31m-      "Edit(src/main/resources/css/**)",[m
+[31m-      "Write(src/main/resources/css/**)",[m
+[32m+[m[32m      "Edit(src/main/resources/**/*.css)",[m
+[32m+[m[32m      "Write(src/main/resources/**/*.css)",[m
+       "Read(./samples/**)",[m
+       "Read(./backup/**)",[m
+       "Read(./.env)",[m
+[1mdiff --git a/CLAUDE.md b/CLAUDE.md[m
+[1mindex 9c68127..50b2691 100644[m
+[1m--- a/CLAUDE.md[m
+[1m+++ b/CLAUDE.md[m
+[36m@@ -139,15 +139,17 @@[m [msalesmanager/[m
+     │   │   ├── App.java                 # extends Application: dựng DI, chạy migration, hiện cửa sổ đầu[m
+     │   │   ├── config/                  # AppConfig, AppPaths, DataSourceFactory[m
+     │   │   ├── di/                      # ServiceRegistry[m
+[31m-    │   │   ├── domain/                  # record, enum, value object (Money, Period, AgingBucket)[m
+[31m-    │   │   ├── repository/              # SQL gom hết ở đây, một class một bảng/nhóm bảng[m
+[31m-    │   │   ├── service/                 # business logic, KHÔNG import javafx.*[m
+[32m+[m[32m    │   │   ├── models/[m
+[32m+[m[32m    │   │   │   ├── dto/                 # record cho dữ liệu đi qua layer (ImportRow, SalesFilter)[m
+[32m+[m[32m    │   │   │   └── entity/              # record/class map 1-1 với bảng DB (Customer, SalesOrder)[m
+[32m+[m[32m    │   │   ├── repositories/            # SQL gom hết ở đây, một class một bảng/nhóm bảng[m
+[32m+[m[32m    │   │   ├── services/                # business logic, KHÔNG import javafx.*[m
+     │   │   ├── importer/                # đọc Excel → kiểm tra → upsert (xem mục 6.5)[m
+     │   │   ├── report/                  # xuất Excel, PDF[m
+     │   │   ├── task/                    # BackgroundExecutor dùng chung, Task wrapper[m
+     │   │   ├── navigation/              # SceneNavigator, DialogService, FxmlLoaderFactory[m
+[31m-    │   │   ├── exception/               # AppException[m
+[31m-    │   │   ├── util/                    # Validator, MoneyFormat, DateFormat[m
+[32m+[m[32m    │   │   ├── exceptions/              # AppException[m
+[32m+[m[32m    │   │   ├── utils/                   # Validator, MoneyFormat, DateFormat[m
+     │   │   └── ui/                      # nhóm theo tính năng, mỗi thư mục = 1 màn hình[m
+     │   │       ├── today/               # Việc hôm nay (trang mở đầu)[m
+     │   │       ├── dashboard/[m
+[36m@@ -162,8 +164,8 @@[m [msalesmanager/[m
+     │   │       ├── reports/[m
+     │   │       └── settings/[m
+     │   └── resources/[m
+[31m-    │       ├── com/tuantu/salesapp/ui/<tính-năng>/   # *.fxml, cùng package path với controller[m
+[31m-    │       ├── css/                     # base.css, light.css, dark.css[m
+[32m+[m[32m    │       ├── com/tuantu/salesapp/ui/<tính-năng>/   # *.fxml snake_case, cùng package path với controller[m
+[32m+[m[32m    │       ├── com/tuantu/salesapp/ui/styles/main.css   # MỘT stylesheet duy nhất[m
+     │       ├── i18n/                    # messages_vi.properties[m
+     │       ├── images/[m
+     │       ├── db/migration/            # V1__init.sql, V2__...sql[m
+[36m@@ -258,7 +260,8 @@[m [mMột task chỉ được báo **"xong"** khi tất cả mục áp dụng đư[m
+ ### Comment[m
+ - **Mỗi class có một khối comment `//` ngắn ở đầu** nói **vì sao class này tồn tại** và vai trò của nó trong luồng dữ liệu. Class không có khối này là chưa xong, dù code đúng.[m
+ - Comment giải thích **tại sao**, không giải thích **cái gì**. Dùng dấu `—` khi nối "và đây là lý do".[m
+[31m-- **Method public của service có Javadoc ngắn** (1–3 dòng): làm gì, đơn vị/định dạng của tham số và giá trị trả về, ném exception gì. Chỗ khác dùng `//`.[m
+[32m+[m[32m- **Không dùng Javadoc ở đâu cả.** Mọi comment là `//`, kể cả method public của service. Method public của service có 1–3 dòng `//` ở trên: làm gì, đơn vị/định dạng của tham số và giá trị trả về, ném exception gì.[m
+[32m+[m[32m- **Mỗi field cũng tự giải thích.** Comment `//` đặt trên getter và mô tả *field*, không mô tả method. Cặp getter/setter dính liền nhau không có dòng trống; một dòng trống tách cặp của field này với field sau.[m
+ - Mọi công thức nghiệp vụ (tuổi nợ, pace index, lệch nhịp mua) phải có comment dẫn tới mục tương ứng trong `sales-app-spec-javafx.md`.[m
+ [m
+ ### Đặt tên[m
+[36m@@ -272,11 +275,15 @@[m [mMột task chỉ được báo **"xong"** khi tất cả mục áp dụng đư[m
+ | Service / Repository | hậu tố theo vai trò | `DebtService`, `CustomerRepository` |[m
+ | Row mapper trong repository | luôn là `mapRow` | `private Customer mapRow(ResultSet rs)` |[m
+ | Validator | `requireXxx` / `parseXxx` | `requireNonBlank`, `parsePositiveInt` |[m
+[31m-| File FXML | kebab-case + `-view` | `customer-list-view.fxml` |[m
+[31m-| File CSS | kebab-case | `dark.css` |[m
+[32m+[m[32m| File FXML | **snake_case** | `customer_list.fxml`, `add_customer.fxml` |[m
+[32m+[m[32m| File CSS | một file duy nhất | `main.css` |[m
+ | Style class trong CSS | kebab-case | `.primary-button` |[m
+ | `fx:id` | camelCase, khớp tên field `@FXML` | `customerTable`, `saveButton` |[m
+[31m-| Handler trong controller | `onXxxClicked` | `onSaveClicked` |[m
+[32m+[m[32m| Field `@FXML` | **tiền tố theo loại** + PascalCase | `txtSearch`, `lblMessage`, `btnSave`, `cbGroup`, `dpFromDate`, `colQty`, `tableCustomer` |[m
+[32m+[m[32m| Handler hành động | **`handleXxx()`** | `handleImport`, `handleSearch`, `handleDelete` |[m
+[32m+[m[32m| Handler điều hướng | **`goXxx()`** | `goBack`, `goCustomerList` |[m
+[32m+[m[32m| Method async | `xxxAsync` | `importAsync`, `loadFromDbAsync` |[m
+[32m+[m[32m| Tên thread | kebab-case + `-thread` | `"import-thread"`, `"aging-thread"` |[m
+ | Key i18n | dot.case | `customer.list.title` |[m
+ | Bảng / cột DB | snake_case; bảng **số ít** (theo spec mục 5) | `sales_order`, `created_at` |[m
+ | Boolean | tiền tố `is/has/can/should` | `isActive`, `hasUnsavedChanges` |[m
+[36m@@ -289,9 +296,14 @@[m [mMột task chỉ được báo **"xong"** khi tất cả mục áp dụng đư[m
+ - `Optional` chỉ làm **kiểu trả về**, không làm field hay tham số. Không trả `null` cho collection — trả list rỗng.[m
+ - **Tiền: `BigDecimal`**, không `double`/`float`. VND dùng `setScale(0, RoundingMode.HALF_UP)`; mọi phép chia **phải** nêu rõ scale và RoundingMode.[m
+ - **Thời gian: `java.time`**. `LocalDate` cho ngày nghiệp vụ, `Instant` cho dấu thời gian hệ thống. Không `java.util.Date` / `SimpleDateFormat`.[m
+[31m-- Exception: validation → `IllegalArgumentException`, message dạng `"<Field> must ..."` kết thúc bằng dấu chấm. Trạng thái nghiệp vụ sai → `IllegalStateException`. Lỗi hạ tầng → `AppException` (có `code` + message). **Cấm** `catch (Exception e) {}` rỗng. Tài nguyên luôn dùng **try-with-resources**.[m
+[32m+[m[32m- Exception: validation → `IllegalArgumentException`, message dạng `"<Field> must ..."` kết thúc bằng dấu chấm. Trạng thái nghiệp vụ sai → `IllegalStateException`. Lỗi hạ tầng → `AppException extends RuntimeException`, đúng **hai** constructor: `(message)` và `(message, cause)` — không có field `code`. Cần phân biệt loại lỗi theo code thì tạo subclass, đừng thêm field. **Cấm** `catch (Exception e) {}` rỗng. Tài nguyên luôn dùng **try-with-resources**.[m
+ - Không dùng Lombok. Dùng `record` thay thế.[m
+[31m-- Formatter số/ngày (`DecimalFormat`, `DateTimeFormatter`) để trong `util/`, một nơi duy nhất. Tiền hiển thị `1.234.567`, ngày `dd/MM/yyyy`.[m
+[32m+[m[32m- **4 space, không tab. Opening brace cùng dòng.**[m
+[32m+[m[32m- **Thứ tự import:** khối `java.*` / `javax.*` → dòng trống → khối `com.tuantu.salesapp.*` → dòng trống → khối `javafx.*` → dòng trống → còn lại (`org.slf4j`, `org.junit`...). Không wildcard import trong Java; ngoại lệ duy nhất được dung thứ là `import java.sql.*;` trong repository. FXML thì dùng wildcard.[m
+[32m+[m[32m- Kiểu fully-qualified viết thẳng trong khai báo là chấp nhận được cho một chỗ dùng duy nhất (`private java.time.LocalDate expiryDate;`) — đừng "sửa cho đẹp" khi đi ngang.[m
+[32m+[m[32m- Wrap `String.format` dài sau chuỗi format, các argument thụt vào dòng tiếp theo.[m
+[32m+[m[32m- Em dash `—` là dấu câu để nối "và đây là lý do" trong comment.[m
+[32m+[m[32m- Formatter số/ngày (`DecimalFormat`, `DateTimeFormatter`) để trong `utils/`, một nơi duy nhất. Tiền hiển thị `1.234.567`, ngày `dd/MM/yyyy`.[m
+ [m
+ ---[m
+ [m
+[36m@@ -375,7 +387,7 @@[m [mChi tiết: `sales-app-spec-javafx.md` mục 9.1.[m
+ - Logic của task (phần "việc") nằm trong service để **test được mà không cần JavaFX**.[m
+ [m
+ ### FXML & Controller[m
+[31m-- FXML chỉ dựng layout. Controller khai báo `@FXML private` field khớp `fx:id`, handler `@FXML private void onXxxClicked()`.[m
+[32m+[m[32m- FXML chỉ dựng layout. Controller khai báo `@FXML private` field khớp `fx:id` (tên dạng `txtSearch`, `btnSave`, `tableCustomer`), handler `@FXML private void handleSave()` hoặc `goBack()`.[m
+ - Load FXML qua **một helper** (`navigation/FxmlLoaderFactory`) có `setControllerFactory` để inject dependency. Không `new Controller()` bằng tay.[m
+ - `initialize()` chạy **trước khi** scene được gắn: không giả định `getScene()` / `getWindow()` có giá trị. Cần thì lắng nghe `sceneProperty()`.[m
+ - Không SQL, business logic, hay `new Thread` trong controller.[m
+[36m@@ -396,7 +408,8 @@[m [mChi tiết: `sales-app-spec-javafx.md` mục 9.1.[m
+ - `Application.stop()` phải: dừng executor, đóng connection pool, **chạy backup**, lưu cài đặt cửa sổ/theme.[m
+ [m
+ ### CSS & giao diện[m
+[31m-- Style trong **file CSS** (`base.css` + `light.css` / `dark.css`), dùng **style class**. Hạn chế `setStyle(...)` inline, chỉ cho giá trị động.[m
+[32m+[m[32m- Style trong **một file CSS duy nhất** `com/tuantu/salesapp/ui/styles/main.css`, dùng **style class**. Hạn chế `setStyle(...)` inline, chỉ cho giá trị động.[m
+[32m+[m[32m- **Vì sao chỉ một file dù có 2 theme:** AtlantaFX tự đổi stylesheet của nó khi đổi sáng/tối và định nghĩa sẵn các *looked-up color* (`-color-bg-default`, `-color-fg-default`...). `main.css` chỉ dùng lại các biến đó nên tự đúng ở cả hai theme — không cần `light.css`/`dark.css` riêng.[m
+ - Màu và kích thước dùng chung khai báo bằng *looked-up color* ở `.root` (vd `-app-primary`). Sáng/tối = đổi stylesheet (AtlantaFX).[m
+ - **Một bộ nền tảng duy nhất, chốt ở M2:** thang khoảng cách 8px (4/8/16/24/32), một thang cỡ chữ, một bảng màu. Mọi màn hình sau dùng lại, không tự đặt số mới.[m
+ - **Màu trạng thái cố định:** đỏ = quá hạn / nguy cơ fail target; cam = sắp đến hạn / cận date / chậm tiến độ; xanh = đạt. Dùng đúng 3 màu này ở mọi màn hình.[m
+[36m@@ -419,7 +432,7 @@[m [mChi tiết: `sales-app-spec-javafx.md` mục 9.1.[m
+ | Field `@FXML` bị `null` | `fx:id` không khớp tên field, thiếu `@FXML`, hoặc controller tự `new` | Kiểm tra tên; load qua `FxmlLoaderFactory` |[m
+ | `LoadException` / "Location is not set" | Sai đường dẫn FXML, FXML không trong classpath | `getResource(...)` đúng package path; kiểm tra `src/main/resources` |[m
+ | `Error: JavaFX runtime components are missing` | `main()` nằm trong class `extends Application` | Tách `Launcher` có `main()` riêng, gọi `Application.launch(App.class, args)` |[m
+[31m-| CSS không áp dụng | Sai đường dẫn stylesheet hoặc sai tên style class | `getResource("/css/base.css").toExternalForm()` |[m
+[32m+[m[32m| CSS không áp dụng | Sai đường dẫn stylesheet hoặc sai tên style class | `getResource("/com/tuantu/salesapp/ui/styles/main.css").toExternalForm()` |[m
+ | App chậm dần theo thời gian | Listener không được gỡ, list tăng mãi | Gỡ listener khi đóng view |[m
+ | Tiến trình Java vẫn chạy sau khi đóng cửa sổ | Executor không phải daemon | Daemon thread + đóng executor trong `stop()` |[m
+ | Số tiền lệch vài đồng | `double`, hoặc chia `BigDecimal` không nêu RoundingMode | `BigDecimal` + `setScale(0, HALF_UP)` |[m
+[36m@@ -661,7 +674,7 @@[m [mNằm trong `.claude/commands/`. `$ARGUMENTS` là phần tôi gõ sau lệnh.[m
+ [m
+ Rule trong file này là **hướng dẫn**. Với những thứ tuyệt đối không được xảy ra, đã chặn bằng `permissions.deny`:[m
+ [m
+[31m-- `Edit`/`Write` vào `src/main/java/**`, `src/test/java/**`, `**/*.fxml`, `css/**` → giữ chế độ hướng dẫn ở mục 0.1[m
+[32m+[m[32m- `Edit`/`Write` vào `src/main/java/**`, `src/test/java/**`, `**/*.fxml`, `**/*.css` → giữ chế độ hướng dẫn ở mục 0.1[m
+ - `Read` vào `samples/**`, `backup/**`, `.env`, `secrets/**` → Claude không đọc được dữ liệu công ty[m
+ - `Bash(git push|git commit|git reset --hard|git rebase)` → mục 10[m
+ - `Bash(mvn deploy|mvn flyway:clean|dropdb|psql|rm -rf)` → chống xoá dữ liệu[m
+[1mdiff --git a/docs/DECISIONS.md b/docs/DECISIONS.md[m
+[1mindex 1fbd27d..ac63773 100644[m
+[1m--- a/docs/DECISIONS.md[m
+[1m+++ b/docs/DECISIONS.md[m
+[36m@@ -47,7 +47,7 @@[m [mMới nhất ở dưới cùng. Khi nào phải ghi ADR: `CLAUDE.md` mục 12.[m
+ [m
+ ## ADR-7: Viết FXML tay; không dựng app bằng WebView — 2026-10-02[m
+ **Bối cảnh:** câu hỏi "có cách nào đẹp hơn Scene Builder hay viết tay không".[m
+[31m-**Quyết định:** viết FXML tay, Scene Builder chỉ mở để xem trước. Giao diện đẹp đến từ AtlantaFX + Ikonli + `base.css`. WebView chỉ xét ở M16 cho đúng màn hình dashboard.[m
+[32m+[m[32m**Quyết định:** viết FXML tay, Scene Builder chỉ mở để xem trước. Giao diện đẹp đến từ AtlantaFX + Ikonli + CSS riêng (ADR-25 chốt lại là một file `ui/styles/main.css`). WebView chỉ xét ở M16 cho đúng màn hình dashboard.[m
+ **Lý do:** Scene Builder và viết tay sinh ra **cùng một file FXML và cùng một giao diện** — công cụ soạn không quyết định độ đẹp. Scene Builder sinh nhiều `prefWidth` cứng (phá responsive) và hay ghi đè phần sửa tay.[m
+ **Phương án đã loại:** WebView cho cả app (WebKit cũ, gõ chữ lệch giao diện, phải bảo trì cầu nối Java↔JS cho mọi màn hình); Compose Multiplatform / Electron / Tauri (đổi hẳn ngôn ngữ, bỏ toàn bộ spec).[m
+ **Hệ quả:** phải chốt một nền tảng thiết kế ở M2 (thang 8px, một thang cỡ chữ, một bảng màu, 3 màu trạng thái) và mọi màn hình sau dùng lại.[m
+[36m@@ -179,3 +179,30 @@[m [mNgoài ra: không log tên khách, số điện thoại, số nợ cụ thể, g[m
+ - `pom.xml` cần `maven-jar-plugin` ghi `Class-Path` vào manifest với prefix `lib/`, và `maven-dependency-plugin` copy dependency sang `target/app/lib/`. Output gom về `target/app/` để `jpackage --input` trỏ vào một chỗ.[m
+ - **Lệnh `jpackage` đầy đủ chưa được kiểm chứng** — đó là việc của **spike S1** sau M2. Nếu S1 cho thấy cách này không chạy, phương án dự phòng là `jpackage` không kèm `--runtime-image` (bộ cài to hơn nhưng chắc chắn chạy).[m
+ - `CLAUDE.md` mục 14 đã được sửa cho khớp quyết định này.[m
+[32m+[m
+[32m+[m[32m## ADR-25: Áp house style cho naming / comment / package, giữ ADR-2 cho kiến trúc — 2026-10-02[m
+[32m+[m[32m**Bối cảnh:** skill `java-layered-style` mô tả house style Java cá nhân. ADR-2 đã chọn `CLAUDE.md` thắng khi hai bên chống nhau, nhưng phần lớn skill **không** chống nhau với `CLAUDE.md` — nó chỉ quy định cách đặt tên, cách comment và cách xếp package. Đổi những thứ đó lúc này gần như miễn phí vì M2 chưa viết FXML nào.[m
+[32m+[m[32m**Quyết định — lấy từ house style:**[m
+[32m+[m[32m- Package số nhiều: `exceptions/`, `repositories/`, `services/`, `utils/`; `domain/` → `models/{dto,entity}/`[m
+[32m+[m[32m- FXML **snake_case** (`customer_list.fxml`), đặt trong `resources` cùng package path với controller[m
+[32m+[m[32m- **Một** stylesheet duy nhất `com/tuantu/salesapp/ui/styles/main.css`[m
+[32m+[m[32m- Field `@FXML` tiền tố theo loại: `txtSearch`, `lblMessage`, `btnSave`, `cbGroup`, `dpFromDate`, `colQty`, `tableCustomer`[m
+[32m+[m[32m- Handler `handleXxx()` cho hành động, `goXxx()` cho điều hướng[m
+[32m+[m[32m- Method async `xxxAsync`, tên thread kebab-case + `-thread`[m
+[32m+[m[32m- **Không dùng Javadoc ở đâu cả** — mọi comment là `//`, kể cả API public của service[m
+[32m+[m[32m- Comment `//` trên getter mô tả *field*; cặp getter/setter dính liền nhau[m
+[32m+[m[32m- Thứ tự import: `java.*` → `com.tuantu.salesapp.*` → `javafx.*` → còn lại[m
+[32m+[m[32m- `AppException` đúng hai constructor `(message)` và `(message, cause)`, **bỏ field `code`**[m
+[32m+[m
+[32m+[m[32m**Quyết định — giữ ADR-2, KHÔNG lấy từ house style:**[m
+[32m+[m[32m| House style | Giữ nguyên | Lý do |[m
+[32m+[m[32m|---|---|---|[m
+[32m+[m[32m| `e.printStackTrace()`, `System.out.printf("[LOG]...")` | SLF4J + Logback | App quản lý công nợ thật; repository nuốt lỗi rồi `return false` làm lỗi import biến mất không dấu vết |[m
+[32m+[m[32m| Hand-rolled daemon thread, không dùng `Task` | `Task` + executor dùng chung | Cần tiến trình và huỷ cho import/báo cáo (spec 9.1); `Task` có sẵn `updateProgress` và `isCancelled` |[m
+[32m+[m[32m| `Service.getInstance()` singleton tĩnh | constructor DI + `ServiceRegistry` | Spec yêu cầu test service không mở UI |[m
+[32m+[m[32m| Repository trả `null`, nuốt `SQLException` | lỗi hạ tầng nổi lên thành `AppException` | Cùng lý do dòng 1 |[m
+[32m+[m[32m| Java 17 | Java 21 | Spec mục 3 chốt 21 |[m
+[32m+[m[32m| `ui/controllers/` phẳng | `ui/<tính-năng>/` | 12 màn hình, ~25 controller trong một thư mục thì không tìm được (ADR-3) |[m
+[32m+[m
+[32m+[m[32m**Phương án đã loại:** theo skill hoàn toàn (đảo ADR-2 — mất khả năng chẩn đoán lỗi và khả năng test); bỏ hẳn skill (mất style cá nhân mà không được gì, vì phần naming không ảnh hưởng kiến trúc).[m
+[32m+[m[32m**Hệ quả:** `CLAUDE.md` mục 3, 5, 7, 16 đã sửa. Đổi tên 4 thư mục Java + dời `css/` sang `ui/styles/`. Không có file `.java` nào phải sửa vì `AppException`/`AppPaths` còn chưa được tạo.[m
+[1mdiff --git a/docs/ROADMAP.md b/docs/ROADMAP.md[m
+[1mindex fa5baf7..f8180bd 100644[m
+[1m--- a/docs/ROADMAP.md[m
+[1m+++ b/docs/ROADMAP.md[m
+[36m@@ -23,9 +23,9 @@[m [mCập nhật: 02/10/2026. Nguồn yêu cầu: `sales-app-spec-javafx.md` v3. Quy[m
+ | ID | Nội du
