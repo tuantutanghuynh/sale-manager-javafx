@@ -13,6 +13,12 @@ import atlantafx.base.theme.PrimerLight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tuantu.salesapp.config.AppConfig;
+import com.tuantu.salesapp.config.DatabaseMigrator;
+import com.tuantu.salesapp.config.DataSourceFactory;
+
+import com.zaxxer.hikari.HikariDataSource;
+
 // JavaFX application class. Owns the lifecycle only: builds the object graph,
 // runs database migration and shows the first window. No business logic here.
 // Launched by Launcher, never run directly (see CLAUDE.md section 14).
@@ -24,6 +30,22 @@ public class App extends Application {
     // break.
     private static final double MIN_WIDTH = 1024;
     private static final double MIN_HEIGHT = 700;
+
+    // Held so stop() can close the pool — a pool left open keeps non-daemon threads
+    // alive and the JVM never exits.
+    private HikariDataSource dataSource;
+
+    // Runs on the JavaFX-Launcher thread, before start(). Everything slow and
+    // everything touching the database belongs here: start() runs on the FX
+    // Application Thread, where a database call would freeze the interface
+    // (CLAUDE.md section 7). Nothing in init() may touch Stage or Scene.
+    @Override
+    public void init() {
+        AppConfig config = AppConfig.load();
+        dataSource = DataSourceFactory.create(config);
+        DatabaseMigrator.migrate(dataSource);
+        log.info("Database ready");
+    }
 
     @Override
     public void start(Stage stage) {
@@ -53,9 +75,9 @@ public class App extends Application {
 
     @Override
     public void stop() {
-        // Step 5 wires the ServiceRegistry shutdown here (executor, connection pool,
-        // backup).
-        // Keeping the override now documents that this hook exists and must not be
-        // forgotten.
+        if (dataSource != null) {
+            dataSource.close();
+        }
+        // M4 adds the automatic backup here; M2 adds the shared executor shutdown.
     }
 }
