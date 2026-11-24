@@ -6,6 +6,34 @@ Claude **không nhớ session trước** — file này là bộ nhớ dài hạn
 
 ---
 
+## [2026-11-25] — M1 GĐ1: báo lỗi khởi động thân thiện (agy viết, Claude review)
+**Milestone:** M1 (GĐ1/3 xong)
+
+**Đã làm:**
+- `App.init()` bắt mọi lỗi config/DB/migration, đóng pool, lưu lỗi; `start()` hiện dialog rồi `Platform.exit()`
+- Default uncaught exception handler: log đủ stack trace, dialog luôn qua `Platform.runLater` (tránh `showAndWait` trong lúc layout)
+- `navigation/StartupErrorReporter` — ghép nội dung dialog từ `messages_vi.properties`; lỗi không mong muốn không hiện chữ thô
+- Sửa `AppException.java` (19 dấu `.` thừa làm `mvn clean compile` fail), thứ tự import `App.java`, comment bị ngắt dòng
+- Review: agy lần 1 (7 điểm) + Claude lần 2 → nhận 5, nhận một phần 2, hoãn `initOwner` sang M2
+
+**File thay đổi:** `App.java`, `AppConfig.java`, `AppPaths.java`, `AppException.java`, `navigation/StartupErrorReporter.java`, `i18n/messages_vi.properties`, test `StartupErrorReporterTest` (7), `MessagesBundleTest` (4)
+
+**Đã kiểm chứng (Claude chạy):**
+- `mvn -B clean verify` → Tests run: 13, Failures: 0, Errors: 0 → BUILD SUCCESS
+- `mvn spotless:check` → pass
+- **Chưa kiểm chứng:** chạy app thật (`mvn javafx:run`) với: sai mật khẩu DB, chưa có `config.properties`, Postgres tắt → phải thấy dialog tiếng Việt rồi app thoát
+
+**Ghi chú vận hành agy (đã học được):**
+- Phải chỉ định `--model gemini-3.8-flash-high` — model mặc định trả 404, Gemini 4 Hydrogen không có trong tài khoản
+- Headless tự từ chối mọi lệnh shell không có trong allow; allow phải **khớp nguyên văn** (`command(mvn -q -B test)`), truyền qua `--settings` chỉ cho phiên đó
+- Tạo sẵn thư mục mới trước khi gọi agy (nó hay `mkdir` và bị chặn)
+- `GEMINI.md` bị agy cắt ở 24.000 byte (file 51.557 byte) — mục 6–11 có thể không được đọc; cần bản rút gọn
+- agy có quyền đọc toàn cục `C:\programming\java project` (grant cũ từ dự án warehouse-backend)
+
+**Bước tiếp theo:** GĐ2 — `models/entity/Customer`, `repositories/CustomerRepository`, `di/ServiceRegistry`
+
+---
+
 ## [2026-11-24] — Rà soát dự án; đổi quy trình sang agy viết code (ADR-29)
 **Milestone:** M1 (đang làm dở)
 
