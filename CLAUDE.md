@@ -46,6 +46,19 @@
 - Khi tôi báo đã làm xong, Claude đọc lại file thực tế và chạy `git diff` (chỉ đọc) để đối chiếu với hướng dẫn, rồi mới kết luận.
 - Hướng dẫn dùng thư viện / API chưa chắc chắn → nói rõ "không chắc" và chỉ cách kiểm tra (Javadoc, source), không bịa.
 
+### 0.1a Ngoại lệ: agy viết code, Claude review (ADR-29, từ 2026-11-24)
+
+Từ M1, code `.java` / `.fxml` / `.css` do **Antigravity CLI (`agy`)** viết theo prompt Claude soạn; Claude **vẫn không tự sửa** các file đó (giữ `deny` trong `.claude/settings.json`). Quy trình mỗi giai đoạn:
+
+1. Claude gọi `agy -p "<prompt>" --mode accept-edits` (không bao giờ `--dangerously-skip-permissions`). Prompt ghi rõ **"ADR-29: được phép sửa file sau: ..."** và chỉ trỏ tới file cần đọc, không dán nội dung.
+2. `agy` tự review lần 1 (phiên mới, `--mode plan`, đọc `git diff`).
+3. Claude review lần 2 đối chiếu review của agy + `CLAUDE.md`; lỗi → prompt agy sửa (tối đa 2 vòng, rồi dừng hỏi tôi).
+4. Claude lên kịch bản test → agy viết test → Claude review test.
+5. Kết quả test: theo lựa chọn ghi trong ADR-29.
+6. Claude báo cáo cho tôi sau mỗi giai đoạn: file đổi (`git diff --stat`), điểm review, kết quả test, việc còn lại.
+
+**Điều kiện bắt buộc trước khi gọi agy:** `samples/` không nằm trong thư mục dự án (agy không có rule chặn đọc tương đương). Claude kiểm tra bằng `test -e samples` trước mỗi lần gọi; còn thì **không gọi**.
+
 ### 0.2 Claude được tự viết những file này
 
 Không cần hỏi trước: `docs/**`, `.claude/**`, `.gitignore`, `README.md`, `src/main/resources/db/migration/*.sql`, `src/main/resources/i18n/*.properties`, `src/main/resources/application.properties`.
@@ -500,7 +513,8 @@ Sửa code ảnh hưởng tới một critical flow → chạy lại UI test c�
 
 ## 10. Git
 
-- **Không tự chạy** `git commit`, `git push`, `git reset --hard`, `git rebase`, `git checkout -- .`, force push. Mặc định chỉ đề xuất lệnh, tôi tự chạy. Đã chặn trong `.claude/settings.json`.
+- **Không tự chạy** `git reset --hard`, `git rebase`, `git checkout -- .`, force push. Đã chặn trong `.claude/settings.json`.
+- **Từ 2026-11-24 (ADR-29), Claude được tự `git commit` và `git push`** sau mỗi giai đoạn đã review, trên nhánh `feature/...` / `fix/...` (không commit thẳng `main`). Commit đứng tên git user của tôi; **tuyệt đối không** thêm `Co-Authored-By: Claude`, "Generated with Claude Code" hay bất kỳ dấu AI nào vào commit message / PR. Không bao giờ `git add -A` / `git add .` — chỉ add đúng file đã review.
 - **Được phép và nên chạy** lệnh chỉ đọc: `git status`, `git diff`, `git diff --stat`, `git log --oneline -n 10`.
 - Commit message theo **Conventional Commits**, tiếng Anh:
   ```
@@ -519,7 +533,7 @@ Sửa code ảnh hưởng tới một critical flow → chạy lại UI test c�
 
 ## 11. Những điều CẤM
 
-- Tự tạo, sửa, đổi tên, xoá file `.java`, `.fxml`, `.css` — vi phạm mục 0.1.
+- Tự tạo, sửa, đổi tên, xoá file `.java`, `.fxml`, `.css` — vi phạm mục 0.1 (việc đó giao cho agy theo mục 0.1a).
 - Tự chạy lệnh có tác dụng phụ (`mvn verify/test/javafx:run`, `jpackage`, `flyway:migrate`, `psql`) thay vì đưa lệnh cho tôi chạy.
 - Đưa hướng dẫn thiếu một trong 4 phần của mục 0.1.
 - Chạy việc nặng (DB, file, mạng, tính toán lâu) hoặc `Thread.sleep` trên FX Application Thread.
@@ -676,7 +690,7 @@ Rule trong file này là **hướng dẫn**. Với những thứ tuyệt đối 
 
 - `Edit`/`Write` vào `src/main/java/**`, `src/test/java/**`, `**/*.fxml`, `**/*.css` → giữ chế độ hướng dẫn ở mục 0.1
 - `Read` vào `samples/**`, `backup/**`, `.env`, `secrets/**` → Claude không đọc được dữ liệu công ty
-- `Bash(git push|git commit|git reset --hard|git rebase)` → mục 10
+- `Bash(git reset --hard|git rebase|git checkout -- )` → mục 10 (`git commit`/`git push` đã gỡ chặn theo ADR-29)
 - `Bash(mvn deploy|mvn flyway:clean|dropdb|psql|rm -rf)` → chống xoá dữ liệu
 
 Đây là lớp chặn bổ sung chứ không tuyệt đối: Claude vẫn có thể ghi file gián tiếp qua shell (`sed -i`, `>`), nên vẫn dựa vào rule mục 0.1 và việc review `git diff`.

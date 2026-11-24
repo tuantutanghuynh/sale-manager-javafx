@@ -231,3 +231,15 @@ Ngoài ra: không log tên khách, số điện thoại, số nợ cụ thể, g
 **Lý do:** tên tỉnh là thứ phải chuẩn để báo cáo theo khu vực không bị tách đôi — seed đủ thì không bao giờ gõ sai. Phường xã thì chỉ cần của những khách thật sự có; seed 3.300 dòng làm file migration phình to mà 99% không bao giờ dùng tới.
 **Phương án đã loại:** seed đủ cả phường xã (migration lớn, khó review, chậm khi chạy test); để cả hai trống (mất lợi ích của danh mục).
 **Hệ quả:** màn hình khách hàng ở M2/M3 phải có luồng "thêm phường mới" — không chỉ là dropdown chỉ đọc. Khi danh mục hành chính thay đổi, thêm bản ghi mới chứ không sửa bản ghi cũ, để khách cũ giữ được khu vực lịch sử.
+
+## ADR-29: Antigravity CLI (`agy`) viết code, Claude Code review và lên kịch bản test — 2026-11-24
+**Bối cảnh:** ADR-6 giữ chế độ hướng dẫn: Claude không sửa `.java`/`.fxml`/`.css`, tôi tự gõ để học. Tới M1, tôi muốn tiết kiệm token Claude và tăng tốc, nhưng vẫn muốn có review độc lập.
+**Quyết định:** từ M1, code do `agy` viết theo prompt Claude soạn. Mỗi giai đoạn: agy viết → agy tự review (`--mode plan`) → Claude review lần 2 → Claude lên kịch bản test → agy viết test → Claude kiểm lại → báo cáo cho tôi. Claude vẫn **không tự sửa** file code (giữ `deny`). Quy tắc chi tiết: `CLAUDE.md` mục 0.1a, `GEMINI.md` mục 0.1a.
+**Lý do:** hai agent khác nhà cung cấp review chéo bắt được lỗi mà một agent tự review dễ bỏ qua; Claude chỉ đọc `git diff` và kết quả nên tốn ít token hơn viết code.
+**Phương án đã loại:** giữ chế độ hướng dẫn (chậm hơn, nhưng học sâu hơn — chấp nhận đánh đổi); Claude viết code (tốn token, mất review chéo).
+**Hệ quả:**
+- **Rủi ro dữ liệu:** `agy` không có rule chặn đọc `samples/` như `.claude/settings.json`. Bắt buộc chuyển `samples/` ra ngoài thư mục dự án; Claude kiểm tra trước mỗi lần gọi agy.
+- Mất phần "tự gõ để học" — bù bằng báo cáo sau mỗi giai đoạn giải thích code làm gì.
+- Commit/push: dưới tài khoản GitHub của tôi, **không** gắn dấu Claude/AI vào commit message. Cách thực hiện (tôi chạy hay Claude chạy) chốt khi gỡ `deny` cho `git commit`/`git push`.
+- **Chưa chốt:** ai chạy `mvn test`/`mvn verify` (Claude hay tôi); `V1__init.sql` đã chạy trên DB nào chưa.
+- Rollback: xoá mục 0.1a ở `CLAUDE.md`/`GEMINI.md`, quay lại ADR-6.

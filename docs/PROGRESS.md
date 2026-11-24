@@ -6,6 +6,40 @@ Claude **không nhớ session trước** — file này là bộ nhớ dài hạn
 
 ---
 
+## [2026-11-24] — Rà soát dự án; đổi quy trình sang agy viết code (ADR-29)
+**Milestone:** M1 (đang làm dở)
+
+**Đã làm (ghi bù phần M1 từ các commit `3c26bbc`, `592e0d9`):**
+- `config/AppConfig` — gộp `application.properties` + `%APPDATA%/SalesManager/config.properties`; lần chạy đầu tạo file từ template rồi ném `AppException`
+- `config/DataSourceFactory` (HikariCP), `config/DatabaseMigrator` (Flyway), gọi trong `App.init()`; `App.stop()` đóng pool
+- `V1__init.sql`: `province`, `ward`, `customer_group`, `sales_rep`, `customer`, `app_setting`, trigger `updated_at`, seed 3 setting doanh số + 34 tỉnh
+- ADR-26 (PG 18 port 5432), ADR-27 (collation `vi-VN-x-icu` theo cột), ADR-28 (seed tỉnh, phường để trống)
+- Session này: rà toàn bộ dự án, ADR-29 + mục 0.1a trong `CLAUDE.md`/`GEMINI.md`; `config.properties.template` sửa PG16 → 18
+
+**File thay đổi (session này):**
+- `CLAUDE.md`, `GEMINI.md` — mục 0.1a, mục 11
+- `docs/DECISIONS.md` — ADR-29
+- `src/main/resources/config.properties.template` — đường dẫn `pg_dump` bản 18
+
+**Đã kiểm chứng:**
+- Chưa kiểm chứng: `mvn spotless:check verify` và `mvn javafx:run` sau `592e0d9` — chưa có kết quả dán lại; app có kết nối được PG 18 + Flyway chạy V1 thành công hay chưa cũng chưa rõ
+
+**Còn dang dở / Bug đã biết:**
+- `App.java` import sai thứ tự (hai khối `com.tuantu.salesapp.*`) → nhiều khả năng `spotless:check` fail
+- Lỗi config/DB/migration ở `init()` chỉ in stack trace thô, chưa có dialog rồi thoát; chưa có uncaught exception handler
+- Comment bị IDE ngắt dòng trong `App`, `AppConfig`, `AppPaths`
+- File rác `potless:check` đã bị commit → `git rm "potless:check"`
+- `pom.xml` comment còn ghi "PostgreSQL 16" (sửa khi có task pom tiếp theo); driver 42.7.3 với PG 18 chưa kiểm chứng
+- Spec: hai mục cùng số 9.1; spec 9.3 có màu 🟡 trong khi `CLAUDE.md` chỉ cho 3 màu — cần chốt trước M2
+- `samples/` vẫn nằm trong dự án → **chặn** việc gọi agy
+
+**Bước tiếp theo — M1 theo ADR-29:**
+1. GĐ1: báo lỗi khởi động bằng dialog + thoát, uncaught handler, sửa import/comment
+2. GĐ2: `models/entity/Customer`, `repositories/CustomerRepository`, `di/ServiceRegistry`
+3. GĐ3: `TestDatabase` có guard `_test`, `CustomerRepositoryTest`, `AppConfigTest`
+
+---
+
 ## [2026-10-02] — M0.3 xong: khung chạy được, và áp house style
 **Milestone:** M0.3 ✅ — kèm ADR-24, ADR-25
 

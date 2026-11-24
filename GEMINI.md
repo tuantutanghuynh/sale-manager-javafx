@@ -46,6 +46,16 @@
 - Khi tôi báo đã làm xong, Gemini đọc lại file thực tế và đối chiếu với hướng dẫn, rồi mới kết luận.
 - Hướng dẫn dùng thư viện / API chưa chắc chắn → nói rõ "không chắc" và chỉ cách kiểm tra (Javadoc, source), không bịa.
 
+### 0.1a Ngoại lệ: chế độ agent viết code (ADR-29, từ 2026-11-24)
+
+Từ M1, tôi giao việc viết code cho Gemini (Antigravity CLI `agy`), Claude Code review. Khi prompt của task ghi rõ **"ADR-29: được phép sửa file sau: ..."**, Gemini **được** tạo/sửa đúng các file `.java` / `.fxml` / `.css` liệt kê trong prompt đó — không file nào khác. Không cần trả lời theo cấu trúc 4 phần của mục 0.1; thay vào đó viết code trực tiếp và cuối cùng tóm tắt: file đã đổi, lý do, chỗ chưa chắc.
+
+Vẫn giữ nguyên, không có ngoại lệ:
+- **Không đọc `samples/`, `backup/`, `*.xlsx`, `*.dump`, `config.properties`** (mục 0.3).
+- Không sửa `pom.xml`, migration đã chạy, `.claude/**`, `CLAUDE.md`, `GEMINI.md`, `docs/**` trừ khi prompt cho phép rõ.
+- Lệnh được chạy: chỉ `mvn -q compile`, `mvn spotless:apply`, `mvn spotless:check`. **Không** chạy `mvn test/verify/javafx:run`, `flyway:*`, `psql`, `git commit/push/reset`.
+- Mọi quy tắc code ở mục 5, 6, 7, 8 (BigDecimal, PreparedStatement, không `javafx.*` trong service, comment `//` đầu class, thứ tự import...).
+
 ### 0.2 Gemini được tự viết những file này
 
 Không cần hỏi trước: `docs/**`, `.agents/**`, `.gitignore`, `README.md`, `GEMINI.md`, `src/main/resources/db/migration/*.sql`, `src/main/resources/i18n/*.properties`, `src/main/resources/application.properties`.
@@ -514,7 +524,7 @@ Sửa code ảnh hưởng tới một critical flow → chạy lại UI test c�
 
 ## 11. Những điều CẤM
 
-- Tự tạo, sửa, đổi tên, xoá file `.java`, `.fxml`, `.css` — vi phạm mục 0.1.
+- Tự tạo, sửa, đổi tên, xoá file `.java`, `.fxml`, `.css` — vi phạm mục 0.1, trừ đúng các file prompt cho phép theo mục 0.1a.
 - Tự chạy lệnh có tác dụng phụ (`mvn verify/test/javafx:run`, `jpackage`, `flyway:migrate`, `psql`) thay vì đưa lệnh cho tôi chạy.
 - Đưa hướng dẫn thiếu một trong 4 phần của mục 0.1.
 - Chạy việc nặng (DB, file, mạng, tính toán lâu) hoặc `Thread.sleep` trên FX Application Thread.

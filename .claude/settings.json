@@ -14,8 +14,6 @@
       "Read(./backup/**)",
       "Read(./.env)",
       "Read(./secrets/**)",
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
       "Bash(git reset --hard:*)",
       "Bash(git rebase:*)",
       "Bash(git checkout -- :*)",

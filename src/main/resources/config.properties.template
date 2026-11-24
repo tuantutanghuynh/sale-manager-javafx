@@ -8,7 +8,7 @@
 db.password=
 
 # Uncomment and set only if pg_dump / pg_restore are not on PATH.
-# backup.pgBinDir=C:/Program Files/PostgreSQL/16/bin
+# backup.pgBinDir=C:/Program Files/PostgreSQL/18/bin
 
 # Claude API key. Only needed in phase 3 (promotion suggestions). Leave empty until then.
 # ai.apiKey=
