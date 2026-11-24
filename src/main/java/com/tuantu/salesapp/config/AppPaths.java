@@ -17,18 +17,16 @@ public final class AppPaths {
     // Folder created inside the OS application-data directory.
     private static final String APP_DIR_NAME = "SalesManager";
 
-    // System property that logback.xml reads to locate the log folder. Launcher
-    // must
-    // set it before the first LoggerFactory call — Logback configures itself once.
+    // System property that logback.xml reads to locate the log folder. Launcher must set it
+    // before the first LoggerFactory call — Logback configures itself once.
     public static final String LOG_DIR_PROPERTY = "salesmanager.logDir";
 
     private AppPaths() {
         // Utility class — never instantiated.
     }
 
-    // Root folder for everything the user owns. Windows only today (ADR-5); keeping
-    // the OS decision inside this method means adding macOS later touches no
-    // caller.
+    // Root folder for everything the user owns. Windows only today (ADR-5); keeping the OS decision
+    // inside this method means adding macOS later touches no caller.
     public static Path appDir() {
         String appData = System.getenv("APPDATA");
         Path base = (appData == null || appData.isBlank())
@@ -59,10 +57,8 @@ public final class AppPaths {
         return appDir().resolve("config.properties");
     }
 
-    // Creates every folder the app needs. Called once from Launcher before logging
-    // is
-    // initialised, so a failure here cannot be reported through the log — it has to
-    // surface as an exception.
+    // Creates every folder the app needs. Called once from Launcher before logging is initialised,
+    // so a failure here cannot be reported through the log — it has to surface as an exception.
     public static void createDirectories() {
         try {
             Files.createDirectories(logDir());

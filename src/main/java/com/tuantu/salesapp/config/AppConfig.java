@@ -29,11 +29,9 @@ public final class AppConfig {
         this.props = props;
     }
 
-    // Reads the bundled defaults, then overlays the user file. On a first run the
-    // user
-    // file does not exist yet: it is created from the template and the caller is
-    // told
-    // to fill it in, which is friendlier than failing on a missing password later.
+    // Reads the bundled defaults, then overlays the user file. On a first run the user file
+    // does not exist yet: it is created from the template and the caller is told to fill it in,
+    // which is friendlier than failing on a missing password later.
     public static AppConfig load() {
         Properties merged = new Properties();
         merged.putAll(readResource(DEFAULTS_RESOURCE));
@@ -75,8 +73,7 @@ public final class AppConfig {
     private String required(String key) {
         String value = props.getProperty(key);
         if (value == null || value.isBlank()) {
-            throw new AppException(
-                    "Missing configuration key '" + key + "'. Set it in " + AppPaths.configFile());
+            throw new AppException("Missing configuration key '" + key + "'. Set it in " + AppPaths.configFile());
         }
         return value.trim();
     }
