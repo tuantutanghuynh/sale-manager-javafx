@@ -8,6 +8,7 @@ import com.tuantu.salesapp.config.AppConfig;
 import com.tuantu.salesapp.config.AppPaths;
 import com.tuantu.salesapp.config.DataSourceFactory;
 import com.tuantu.salesapp.config.DatabaseMigrator;
+import com.tuantu.salesapp.di.ServiceRegistry;
 import com.tuantu.salesapp.navigation.StartupErrorReporter;
 
 import javafx.application.Application;
@@ -46,6 +47,9 @@ public class App extends Application {
     // Stores any failure during init() so start() can display an error alert on the FX thread.
     private Throwable startupError;
 
+    // Dependency injection registry holding application services; not used in start() yet — M2 will use it.
+    private ServiceRegistry registry;
+
     // Runs on the JavaFX-Launcher thread, before start(). Everything slow and
     // everything touching the database belongs here: start() runs on the FX
     // Application Thread, where a database call would freeze the interface
@@ -74,6 +78,7 @@ public class App extends Application {
             AppConfig config = AppConfig.load();
             dataSource = DataSourceFactory.create(config);
             DatabaseMigrator.migrate(dataSource);
+            registry = new ServiceRegistry(dataSource);
             log.info("Database ready");
         } catch (Throwable e) {
             log.error("Startup failed", e);
