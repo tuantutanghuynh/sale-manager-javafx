@@ -6,6 +6,34 @@ Claude **không nhớ session trước** — file này là bộ nhớ dài hạn
 
 ---
 
+## [2026-11-28] — M1 GĐ2: Customer data layer (agy viết, Claude review)
+**Milestone:** M1 (GĐ2/3 xong)
+
+**Đã làm:**
+- `GEMINI.md` rút gọn còn 16,6 KB (dưới giới hạn 24 KB của agy), chỉ giữ luật viết code; `CLAUDE.md` vẫn là nguồn chuẩn
+- `models/entity/Customer` (record 17 trường, map 1-1 bảng `customer`) + `CustomerRank` (enum A/B/C khớp CHECK)
+  - Validate: code/name không rỗng; `creditLimit` ≥ 0 và **phải là số nguyên VND** (từ chối, không tự làm tròn); số ngày ≥ 0
+- `repositories/CustomerRepository`: `findAll` (ORDER BY name, code), `findById`, `findByCode`, `insert`/`update` dùng `RETURNING`
+  - Cột nullable đọc bằng `getObject(..., Integer.class)`, ghi bằng `setNull`; `TIMESTAMPTZ` → `Instant`
+  - `SQLException` → `AppException`; SQLState `23505` → "Customer code already exists: <code>"; message chỉ chứa id/code
+- `di/ServiceRegistry` (dựng repository một lần), `App.init()` tạo registry sau migration (M2 mới dùng)
+- Review: agy lần 1 (3 điểm, không có mức CAO) + Claude lần 2 → nhận `requireNonNull`; nhận một phần (từ chối số lẻ thay vì làm tròn); bỏ đề xuất bỏ code khỏi message; Claude thêm sửa comment `CustomerRank` cho khớp V1 + comment `SELECT_COLUMNS`
+
+**File thay đổi:** `GEMINI.md`, `App.java`, `di/ServiceRegistry.java`, `models/entity/Customer.java`, `models/entity/CustomerRank.java`, `repositories/CustomerRepository.java`, test `CustomerTest` (13 method, 17 lượt chạy)
+
+**Đã kiểm chứng (Claude chạy):**
+- `mvn -B clean verify` → Tests run: 30, Failures: 0, Errors: 0 → BUILD SUCCESS
+- `mvn spotless:check` → pass
+- **Chưa kiểm chứng:** SQL của `CustomerRepository` trên DB thật — chưa có test repository (cần hạ tầng test DB ở GĐ3)
+
+**Còn dang dở / đã biết:**
+- `CustomerTest` có 5 helper `withXxx` gần giống nhau (record 17 trường không có wither) — chấp nhận
+- Test thủ công GĐ1 (sai mật khẩu / thiếu config / Postgres tắt) vẫn chưa chạy
+
+**Bước tiếp theo:** GĐ3 — `TestDatabase` có guard `_test`, Flyway clean+migrate trên `salesmanager_test`, `CustomerRepositoryTest`, `AppConfigTest`, test cho chính guard
+
+---
+
 ## [2026-11-25] — M1 GĐ1: báo lỗi khởi động thân thiện (agy viết, Claude review)
 **Milestone:** M1 (GĐ1/3 xong)
 
